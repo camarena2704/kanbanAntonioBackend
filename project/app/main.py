@@ -7,6 +7,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from tortoise import Tortoise
+
 from app.api.app import auth_router
 from app.app_config import app_settings
 from app.modules.database_module.settings import module_settings
