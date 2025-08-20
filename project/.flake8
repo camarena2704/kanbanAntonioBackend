@@ -1,0 +1,6 @@
+[flake8]
+max-line-length = 88
+per-file-ignores =
+;     F401: https://www.flake8rules.com/rules/F401.html
+    **__init__.py:F401
+    **__main__.py:F401

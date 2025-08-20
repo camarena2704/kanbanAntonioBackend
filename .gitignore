@@ -1,0 +1,80 @@
+# ===============================
+# Python
+# ===============================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+.env
+.venv
+venv/
+ENV/
+env/
+.venv*/
+
+# Paquetes instalados
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Archivos temporales
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Archivos de tests
+.coverage
+.coverage.*
+.cache
+.nox/
+*.cover
+*.py,cover
+htmlcov/
+.tox/
+pytest_cache/
+
+# ===============================
+# FastAPI
+# ===============================
+# Archivos de Uvicorn / Gunicorn
+*.pid
+*.sock
+
+# ===============================
+# Bases de datos locales
+# ===============================
+*.db
+*.sqlite3
+*.sqlite
+db.sqlite3-journal
+
+# Migraciones (si usas aerich con TortoiseORM)
+migrations/
+
+# ===============================
+# Configuración y secretos
+# ===============================
+# Variables de entorno
+project/.env
+
+# ===============================
+# IDEs / Editores
+# ===============================
+.vscode/
+.idea/
+*.iml
+
+# ===============================
+# Otros
+# ===============================
+.DS_Store
+Thumbs.db
