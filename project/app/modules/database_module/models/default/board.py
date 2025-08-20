@@ -1,14 +1,13 @@
 from tortoise import fields
-from tortoise.fields import OnDelete
 
 from app.modules.database_module.models.database_model import DatabaseModel
 
 
-class Workspace(DatabaseModel):
+class Board(DatabaseModel):
     name = fields.CharField(max_length=255)
-    owner_id = fields.IntField()
+    is_favorite = fields.BooleanField(default=False)
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
     # Relation
-    user = fields.ManyToManyField("default.User", on_delete=OnDelete.CASCADE, through="workspace_user")
+    workspace = fields.ForeignKeyField("default.Workspace", on_delete=fields.CASCADE)
