@@ -8,6 +8,8 @@ class UserInputSchema(BaseModel):
     surname: str
     email: EmailStr
 
+
 class UserOutputSchema(UserInputSchema):
+    id: int
     created_at: datetime
     updated_at: datetime
