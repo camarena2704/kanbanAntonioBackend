@@ -1,5 +1,6 @@
 from app.repositories.workspace_repository import WorkspaceRepository
-from app.schemas.workspace_schema import WorkspaceInputSchema, WorkspaceOutputSchema
+from app.schemas.workspace_schema import WorkspaceInputSchema, WorkspaceOutputSchema, WorkspaceCreateSchema, \
+    WorkspaceFilterInputSchema
 from app.services.user_service.user_service import UserService
 from app.services.workspace_service.workspace_service_exception import WorkspaceServiceExceptionInfo, \
     WorkspaceServiceException
@@ -9,10 +10,18 @@ class WorkspaceService:
     @staticmethod
     async def create_workspace(workspace: WorkspaceInputSchema, user_email) -> WorkspaceOutputSchema:
         user_model = await UserService.get_user_by_email(user_email)
-        response = await WorkspaceRepository.create_workspace(workspace.model_dump())
+
+        workspace_complete = WorkspaceCreateSchema(**workspace.model_dump(), owner_id=user_model.id)
+
+        response = await WorkspaceRepository.create_workspace(workspace_complete.model_dump())
         if not response:
             raise WorkspaceServiceException(WorkspaceServiceExceptionInfo.ERROR_CREATING_WORKSPACE)
 
         await response.user.add(user_model)
 
         return WorkspaceOutputSchema(**response.__dict__)
+
+    @staticmethod
+    async def get_workspace_by_name(workspace_filtered: WorkspaceFilterInputSchema) -> WorkspaceOutputSchema | None:
+        print(workspace_filtered)
+        return await WorkspaceRepository.get_workspace_by_name(workspace_filtered.model_dump())
