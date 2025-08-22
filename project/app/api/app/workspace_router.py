@@ -14,8 +14,3 @@ async def create_workspace(workspace_input: WorkspaceInputSchema,
                            token_decoder: AuthDataOutputSchema = Depends(decode_token)) -> WorkspaceOutputSchema:
     user_email = token_decoder.payload.get("email")
     return await WorkspaceService.create_workspace(workspace_input, user_email)
-
-
-@router.get("/{owner_id}/{name}", response_model=WorkspaceOutputSchema | None)
-async def get_workspace_by_name(owner_id: int, name: str) -> WorkspaceOutputSchema | None:
-    return await WorkspaceService.get_workspace_by_name(WorkspaceFilterInputSchema(owner_id=owner_id, name=name))

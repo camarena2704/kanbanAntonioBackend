@@ -11,6 +11,13 @@ class WorkspaceService:
     async def create_workspace(workspace: WorkspaceInputSchema, user_email) -> WorkspaceOutputSchema:
         user_model = await UserService.get_user_by_email(user_email)
 
+        # Check user not contain workspace with equals name
+        workspace_equals = WorkspaceService.get_workspace_by_name(
+            WorkspaceFilterInputSchema(name=workspace.name, owner_id=user_model.id))
+
+        if workspace_equals:
+            raise WorkspaceServiceException(WorkspaceServiceExceptionInfo.ERROR_EXISTING_WORKSPACE)
+
         workspace_complete = WorkspaceCreateSchema(**workspace.model_dump(), owner_id=user_model.id)
 
         response = await WorkspaceRepository.create_workspace(workspace_complete.model_dump())
