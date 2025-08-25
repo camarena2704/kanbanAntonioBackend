@@ -11,4 +11,7 @@ class Workspace(DatabaseModel):
     updated_at = fields.DatetimeField(auto_now=True)
 
     # Relation
-    user = fields.ManyToManyField("default.User", on_delete=OnDelete.CASCADE, through="workspace_user")
+    user = fields.ManyToManyField("default.User",
+                                  on_delete=OnDelete.CASCADE,
+                                  through="workspace_user",
+                                  related_name="workspaces")

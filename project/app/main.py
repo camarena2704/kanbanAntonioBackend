@@ -8,10 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from tortoise import Tortoise
 
-from app.api.app import (
-    user_router,
-    workspace_router,
-)
+from app.api.app import user_router, workspace_router, board_router
 from app.app_config import app_settings
 from app.modules.database_module.settings import module_settings
 from app.schemas.base_schema import BaseException
@@ -74,8 +71,9 @@ def create_app() -> FastAPI:
     # Routes
     api_version_router = APIRouter()
 
-    api_version_router.include_router(user_router.router, prefix="/user", tags=["User"])
-    api_version_router.include_router(workspace_router.router, prefix="/workspace", tags=["Workspace"])
+    api_version_router.include_router(user_router, prefix="/users", tags=["User"])
+    api_version_router.include_router(workspace_router, prefix="/workspaces", tags=["Workspace"])
+    api_version_router.include_router(board_router, prefix="/boards", tags=["Board"])
 
     application.include_router(
         api_version_router, prefix=f"/api/v{app_settings.api_version}"

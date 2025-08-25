@@ -20,3 +20,8 @@ class WorkspaceOutputSchema(WorkspaceInputSchema):
 
 class WorkspaceFilterInputSchema(WorkspaceInputSchema):
     owner_id: int
+
+
+class WorkspaceFilterByUserInputSchema(BaseSchema):
+    workspace_id: int
+    user_id: int
