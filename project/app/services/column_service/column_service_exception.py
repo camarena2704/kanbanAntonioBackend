@@ -1,0 +1,12 @@
+from app.schemas.base_schema import BaseException, BaseExceptionInfo
+
+
+class ColumnServiceExceptionInfo(BaseExceptionInfo):
+    ERROR_CREATING_COLUMN = (4001, "Error creating board", 500)
+    ERROR_EXISTING_COLUMN_IN_BOARD = (4002, "Error already existing column in this board", 400)
+    ERROR_USER_NOT_CONTAIN_BOARD = (4003, "User does not belong to this board", 400)
+
+
+
+class ColumnServiceException(BaseException):
+    pass
