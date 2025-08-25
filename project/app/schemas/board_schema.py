@@ -14,3 +14,8 @@ class BoardOutputSchema(BoardCreateSchema):
     id: int
     created_at: datetime
     updated_at: datetime
+
+
+class BoardFilterByNameSchema(BaseSchema):
+    name: str
+    workspace_id: int

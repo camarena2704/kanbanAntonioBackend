@@ -1,6 +1,5 @@
 from app.modules.database_module import DatabaseModule
 from app.modules.database_module.models.default import Workspace
-from app.schemas.workspace_schema import WorkspaceFilterByUserInputSchema
 
 
 class WorkspaceRepository:

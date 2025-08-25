@@ -13,7 +13,7 @@ class WorkspaceService:
 
         # Check user not contain workspace with equals name
         workspace_equals = WorkspaceService.get_workspace_by_name(
-            WorkspaceFilterInputSchema(name=workspace.name, owner_id=user_model.id))
+            WorkspaceFilterInputSchema(name=workspace.name.strip(), owner_id=user_model.id))
 
         if workspace_equals:
             raise WorkspaceServiceException(WorkspaceServiceExceptionInfo.ERROR_EXISTING_WORKSPACE)
