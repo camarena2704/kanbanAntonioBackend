@@ -23,7 +23,7 @@ class BoardService:
         is_name_board_exist = await BoardService.get_board_by_name_and_workspace_id(BoardFilterByNameSchema(
             name=board.name,
             workspace_id=board.workspace_id
-        ).model_dump())
+        ))
 
         if is_name_board_exist:
             raise BoardServiceException(BoardServiceExceptionInfo.ERROR_EXISTING_BOARD_IN_WORKSPACE)

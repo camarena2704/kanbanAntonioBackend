@@ -13,3 +13,7 @@ class ColumnRepository:
             "name__iexact": payload.get("name"),
             "board_id": payload.get("board_id")
         })
+
+    @staticmethod
+    async def get_column_by_id(column_id: int) -> Column | None:
+        return await DatabaseModule.get_entity(Column, column_id)

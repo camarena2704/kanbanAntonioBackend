@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-async def create_board_columns_view():
+async def create_tasks_by_board_view():
     """
     Create a database view that retrieves all column names associated with their corresponding board ID.
     """
@@ -26,11 +26,13 @@ async def create_board_columns_view():
     logger.info("Generating view via Tortoise...")
 
     await Tortoise.get_connection("default").execute_query(
-        "create or replace view all_name_columns_board as "
-        "select c.name, c.board_id from columns c "
-        "join board b on b.id = c.board_id;"
+       "CREATE or replace VIEW tasks_by_board AS "
+       "SELECT b.id AS board_id, b.name AS board_name, c.name AS column_name, t.id AS task_id, t.title, t.description, t.order "
+       "FROM board b "
+       "JOIN columns c ON b.id = c.board_id "
+       "JOIN task t ON c.id = t.column_id;"
     )
-    logger.info("Generating view all_name_columns_board done")
+    logger.info("Generating view tasks_by_board done")
 
 if __name__ == '__main__':
-    asyncio.run(create_board_columns_view())
+    asyncio.run(create_tasks_by_board_view())

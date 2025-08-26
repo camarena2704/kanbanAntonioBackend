@@ -5,4 +5,4 @@ from .column import Column
 from .task import Task
 
 # models views
-from .name_columns_board import NameColumnsBoard
+from .task_by_board import TaskByBoard
