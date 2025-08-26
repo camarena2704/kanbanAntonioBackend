@@ -9,3 +9,8 @@ class ColumnCreateSchema(BaseSchema):
 
 class ColumnOutputSchema(ColumnCreateSchema):
     id: int
+
+
+class ColumnFilterNameAndBoardIdSchema(BaseSchema):
+    name: str
+    board_id: int

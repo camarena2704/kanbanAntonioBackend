@@ -1,13 +1,28 @@
-from app.repositories.board_repository import BoardRepository
-from app.schemas.board_schema import BoardCreateSchema, BoardOutputSchema, BoardFilterByNameSchema
-from app.schemas.column_schema import ColumnCreateSchema, ColumnOutputSchema
-from app.schemas.workspace_schema import WorkspaceFilterByUserInputSchema
-from app.services.board_service.board_service_exception import BoardServiceException, BoardServiceExceptionInfo
-from app.services.user_service.user_service import UserService
-from app.services.workspace_service.workspace_service import WorkspaceService
+from app.repositories.column_repository import ColumnRepository
+from app.schemas.column_schema import ColumnCreateSchema, ColumnOutputSchema, ColumnFilterNameAndBoardIdSchema
+from app.services.column_service.column_service_exception import ColumnServiceException, ColumnServiceExceptionInfo
 
 
 class ColumnService:
     @staticmethod
     async def create_column(column: ColumnCreateSchema) -> ColumnOutputSchema:
-        pass
+        # check does not exist column in board with equals name
+        is_exist = await ColumnService.get_column_by_name_and_board_id(
+            ColumnFilterNameAndBoardIdSchema(name=column.name, board_id=column.board_id))
+        if is_exist:
+            raise ColumnServiceException(ColumnServiceExceptionInfo.ERROR_EXISTING_COLUMN_IN_BOARD)
+
+        # create column
+        created_column = await ColumnRepository.create_column(column.model_dump())
+
+        if not created_column:
+            raise ColumnServiceException(ColumnServiceExceptionInfo.ERROR_CREATING_COLUMN)
+
+        return ColumnOutputSchema(**created_column.__dict__)
+
+    @staticmethod
+    async def get_column_by_name_and_board_id(column: ColumnFilterNameAndBoardIdSchema) -> ColumnOutputSchema | None:
+        return await ColumnRepository.get_column_by_name_and_board_id(
+            ColumnFilterNameAndBoardIdSchema(name=column.name.strip(),
+                                             board_id=column.board_id
+                                             ).model_dump())
