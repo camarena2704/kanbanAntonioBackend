@@ -28,7 +28,13 @@ class BoardService:
         if is_name_board_exist:
             raise BoardServiceException(BoardServiceExceptionInfo.ERROR_EXISTING_BOARD_IN_WORKSPACE)
 
-        response = await BoardRepository.create_board(board.model_dump())
+        correct_board = BoardCreateSchema(
+            name=board.name.strip(),
+            is_favourite=board.is_favourite,
+            workspace_id=board.workspace_id,
+        )
+
+        response = await BoardRepository.create_board(correct_board.model_dump())
         if not response:
             raise BoardServiceException(BoardServiceExceptionInfo.ERROR_CREATING_BOARD)
         return BoardOutputSchema(**response.__dict__)

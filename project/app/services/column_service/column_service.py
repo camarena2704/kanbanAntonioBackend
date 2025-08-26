@@ -17,7 +17,12 @@ class ColumnService:
 
         # create column
         try:
-            created_column = await ColumnRepository.create_column(column.model_dump())
+            correct_column = ColumnCreateSchema(
+                name=column.name.strip(),
+                order=column.order,
+                board_id=column.board_id,
+            )
+            created_column = await ColumnRepository.create_column(correct_column.model_dump())
         except IntegrityError as e:
             if "columns_board_id_fkey" in str(e):
                 raise ColumnServiceException(ColumnServiceExceptionInfo.ERROR_CREATING_COLUMN)

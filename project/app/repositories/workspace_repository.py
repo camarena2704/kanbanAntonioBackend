@@ -20,3 +20,9 @@ class WorkspaceRepository:
         return await DatabaseModule.get_entity_filtered(Workspace,
                                                         {"id": payload.get("workspace_id"),
                                                          "user__id": payload.get("user_id")})
+
+    @staticmethod
+    async def get_all_workspace(user_email: str) -> list[Workspace] | None:
+        return await DatabaseModule.get_all_entity_filtered(Workspace, {
+            "user__email": user_email
+        })
