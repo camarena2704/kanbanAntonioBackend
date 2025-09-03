@@ -9,7 +9,10 @@ class TaskRepository:
 
     @staticmethod
     async def get_task_by_title_and_board_id(payload: dict) -> Task | None:
-        return await DatabaseModule.get_entity_filtered(TaskByBoard, {
-            "title__iexact": payload.get("title"),
-            "board_id": payload.get("board_id")
-        })
+        return await DatabaseModule.get_entity_filtered(
+            TaskByBoard,
+            {
+                "title__iexact": payload.get("title"),
+                "board_id": payload.get("board_id"),
+            },
+        )

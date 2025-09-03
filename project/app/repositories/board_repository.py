@@ -9,7 +9,33 @@ class BoardRepository:
 
     @staticmethod
     async def get_board_by_name_and_workspace(payload: dict) -> Board | None:
-        return await DatabaseModule.get_entity_filtered(Board, {
-            "name__iexact": payload.get("name"),
-            "workspace_id": payload.get("workspace_id"),
-        })
+        return await DatabaseModule.get_entity_filtered(
+            Board,
+            {
+                "name__iexact": payload.get("name"),
+                "workspace_id": payload.get("workspace_id"),
+            },
+        )
+
+    @staticmethod
+    async def get_all_board_filter_paginate_by_workspace_id(
+        filters: dict,
+        page: int,
+        limit: int,
+        order: str = "updated_at",
+    ) -> tuple[list[Board], int] | None:
+        return await DatabaseModule.get_all_entity_filtered_paginated(
+            Board,
+            filters=filters,
+            page=page,
+            limit=limit,
+            order=order,
+        )
+
+    @staticmethod
+    async def put_board(payload: dict, identifier: int) -> Board | None:
+        return await DatabaseModule.put_entity(Board, payload, identifier)
+
+    @staticmethod
+    async def get_board_by_identifier(identifier: int) -> Board | None:
+        return await DatabaseModule.get_entity(Board, identifier)

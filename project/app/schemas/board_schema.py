@@ -6,7 +6,7 @@ from app.schemas.base_schema import BaseSchema
 
 class BoardCreateSchema(BaseSchema):
     name: str
-    is_favourite: Optional[bool] = False
+    is_favorite: Optional[bool] = False
     workspace_id: int
 
 
@@ -19,3 +19,8 @@ class BoardOutputSchema(BoardCreateSchema):
 class BoardFilterByNameSchema(BaseSchema):
     name: str
     workspace_id: int
+
+
+class BoardPaginateSchema(BaseSchema):
+    data: list[BoardOutputSchema]
+    total: int

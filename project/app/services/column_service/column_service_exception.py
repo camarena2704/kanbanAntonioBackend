@@ -8,7 +8,5 @@ class ColumnServiceExceptionInfo(BaseExceptionInfo):
     ERROR_COLUMN_NOT_FOUND = (4004, "Column not found", 404)
 
 
-
-
 class ColumnServiceException(BaseException):
     pass

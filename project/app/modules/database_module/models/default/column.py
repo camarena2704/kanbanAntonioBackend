@@ -9,5 +9,6 @@ class Column(DatabaseModel):
 
     # Relation
     board = fields.ForeignKeyField("default.Board", on_delete=fields.CASCADE)
+
     class Meta:
         table = "columns"

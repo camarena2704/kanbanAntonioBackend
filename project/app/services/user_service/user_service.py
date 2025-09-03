@@ -1,7 +1,10 @@
 from app.modules.database_module.models.default import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user_schema import UserInputSchema, UserOutputSchema
-from app.services.user_service.user_service_exception import UserServiceExceptionInfo, UserServiceException
+from app.services.user_service.user_service_exception import (
+    UserServiceException,
+    UserServiceExceptionInfo,
+)
 
 
 class UserService:

@@ -9,5 +9,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model=ColumnOutputSchema)
-async def create_column(column: ColumnCreateSchema, _=Depends(decode_token)) -> ColumnOutputSchema:
+async def create_column(
+    column: ColumnCreateSchema, _=Depends(decode_token)
+) -> ColumnOutputSchema:
     return await ColumnService.create_column(column)

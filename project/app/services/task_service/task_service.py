@@ -1,7 +1,14 @@
 from app.repositories.task_repository import TaskRepository
-from app.schemas.task_schema import TaskCreateSchema, TaskOutputSchema, TaskFilterByTitleAndBoard
+from app.schemas.task_schema import (
+    TaskCreateSchema,
+    TaskFilterByTitleAndBoard,
+    TaskOutputSchema,
+)
 from app.services.column_service.column_service import ColumnService
-from app.services.task_service.task_service_exception import TaskServiceException, TaskServiceExceptionInfo
+from app.services.task_service.task_service_exception import (
+    TaskServiceException,
+    TaskServiceExceptionInfo,
+)
 
 
 class TaskService:
@@ -19,7 +26,9 @@ class TaskService:
         )
 
         if is_exist:
-            raise TaskServiceException(TaskServiceExceptionInfo.ERROR_EXISTING_TASK_IN_BOARD)
+            raise TaskServiceException(
+                TaskServiceExceptionInfo.ERROR_EXISTING_TASK_IN_BOARD
+            )
 
         task_copy = task.model_copy()
         task_copy.title = task.title.strip()
@@ -33,10 +42,11 @@ class TaskService:
         return TaskOutputSchema(**response.__dict__)
 
     @staticmethod
-    async def get_task_by_title_and_board_id(task_filter: TaskFilterByTitleAndBoard) -> TaskOutputSchema | None:
+    async def get_task_by_title_and_board_id(
+        task_filter: TaskFilterByTitleAndBoard,
+    ) -> TaskOutputSchema | None:
         return await TaskRepository.get_task_by_title_and_board_id(
             TaskFilterByTitleAndBoard(
-                board_id=task_filter.board_id,
-                title=task_filter.title.strip()
+                board_id=task_filter.board_id, title=task_filter.title.strip()
             ).model_dump()
         )

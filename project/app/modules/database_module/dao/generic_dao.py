@@ -82,9 +82,8 @@ class GenericDao:
         if not entity:
             return None
 
-        entity = await model.filter(id=identifier).update(**data)
+        for key, value in data.items():
+            setattr(entity, key, value)
 
-        if entity:
-            update_entity = await model.filter(id=identifier).first()
-            return update_entity
-        return None
+        await entity.save()
+        return entity

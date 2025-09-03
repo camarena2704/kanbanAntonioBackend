@@ -1,16 +1,9 @@
 import os
-from datetime import datetime
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import jwt, JWTError
-
-from app.repositories.token_repository import TokenRepository
-
-from app.modules.database_module.models.default.token import Token  # Tu modelo ORM de Token
-
-import os
+from jose import JWTError, jwt
 
 from app.schemas.auth_schema import AuthDataOutputSchema
 
@@ -21,7 +14,7 @@ JWT_ALGORITHM = os.getenv("ALGORITHM")
 
 
 async def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
 ) -> AuthDataOutputSchema:
     token = credentials.credentials
 
@@ -31,7 +24,7 @@ async def get_current_user(
             JWT_SECRET,
             algorithms=[JWT_ALGORITHM],
             audience="messaging_app_client",
-            issuer="messaging_backend"
+            issuer="messaging_backend",
         )
 
         user_id = payload.get("sub")

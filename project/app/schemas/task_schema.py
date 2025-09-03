@@ -9,6 +9,7 @@ class TaskCreateSchema(BaseSchema):
     order: int
     column_id: int
 
+
 class TaskOutputSchema(TaskCreateSchema):
     created_at: datetime
     updated_at: datetime

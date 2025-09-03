@@ -1,10 +1,9 @@
+import os
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from jose import jwt
-from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
-
-import os
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
@@ -25,13 +24,17 @@ def verify_password(plain_password, hashed_password) -> bool:
 def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
     to_encode = data.copy()
     now = datetime.now(timezone.utc)
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({
-        "iat": now,
-        "exp": expire,
-        "aud": "messaging_app_client",
-        "iss": "messaging_backend"
-    })
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    to_encode.update(
+        {
+            "iat": now,
+            "exp": expire,
+            "aud": "messaging_app_client",
+            "iss": "messaging_backend",
+        }
+    )
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 

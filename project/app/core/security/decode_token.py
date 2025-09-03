@@ -13,7 +13,9 @@ JWT_SECRET = os.getenv("SUPABASE_JWT_TOKEN")
 JWT_ALGORITHM = "HS256"
 
 
-async def decode_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> AuthDataOutputSchema:
+async def decode_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> AuthDataOutputSchema:
     token = credentials.credentials
     try:
         payload = jwt.decode(
@@ -21,9 +23,15 @@ async def decode_token(credentials: HTTPAuthorizationCredentials = Depends(secur
         )
         user_id = payload.get("sub")
         if not user_id:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token missing subject")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Token missing subject"
+            )
         return AuthDataOutputSchema(token=token, payload=payload)
     except ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired"
+        )
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )

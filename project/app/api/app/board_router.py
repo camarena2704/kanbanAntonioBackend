@@ -1,16 +1,44 @@
 from fastapi import APIRouter, Depends
 
 from app.core.security.decode_token import decode_token
-from app.repositories.board_repository import BoardRepository
 from app.schemas.auth_schema import AuthDataOutputSchema
-from app.schemas.board_schema import BoardOutputSchema, BoardCreateSchema
+from app.schemas.board_schema import (
+    BoardCreateSchema,
+    BoardOutputSchema,
+    BoardPaginateSchema,
+)
 from app.services.board_service.board_service import BoardService
 
 router = APIRouter()
 
 
 @router.post("/", response_model=BoardOutputSchema)
-async def create_board(payload: BoardCreateSchema,
-                       token_decoder: AuthDataOutputSchema = Depends(decode_token)) -> BoardOutputSchema:
-    user_email = token_decoder.payload.get('email')
+async def create_board(
+    payload: BoardCreateSchema,
+    token_decoder: AuthDataOutputSchema = Depends(decode_token),
+) -> BoardOutputSchema:
+    user_email = token_decoder.payload.get("email")
     return await BoardService.create_board(payload, user_email)
+
+
+@router.get("/all-board-paginated/{workspace_id}", response_model=BoardPaginateSchema)
+async def get_all_board_paginated(
+    workspace_id: int,
+    is_favourite: bool = False,
+    page: int = 0,
+    limit: int = 25,
+    token: AuthDataOutputSchema = Depends(decode_token),
+) -> BoardPaginateSchema:
+    user_email = token.payload.get("email")
+    return await BoardService.get_all_board_paginate_by_workspace_id(
+        user_email, workspace_id, is_favourite, page, limit
+    )
+
+
+@router.put("/update-favorite/{board_id}", response_model=BoardOutputSchema)
+async def update_board_favourite(
+    board_id: int, token: AuthDataOutputSchema = Depends(decode_token)
+) -> BoardOutputSchema:
+    return await BoardService.update_favorite_board(
+        board_id, token.payload.get("email")
+    )
