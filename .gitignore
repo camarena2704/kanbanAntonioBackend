@@ -79,3 +79,4 @@ project/.env.development
 # ===============================
 .DS_Store
 Thumbs.db
+project/.format_code.sh
