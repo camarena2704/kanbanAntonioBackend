@@ -1,25 +1,29 @@
 # Kanban Antonio
 
-A modern, lightweight Kanban board application inspired by Trello, built with FastAPI and modern web technologies. Create workspaces, organize boards, and manage tasks with an intuitive drag-and-drop interface.
+A modern, high-performance REST API for Kanban board management inspired by Trello, built with FastAPI. This backend service provides comprehensive endpoints to create workspaces, organize boards, and manage tasks programmatically.
 
-## ✨ Features
+## ✨ API Features
 
-- **🏢 Workspaces**: Create and manage multiple workspaces for different projects or teams
-- **📋 Boards**: Organize your work with customizable boards within each workspace
-- **📝 Cards**: Create, edit, and manage task cards with detailed information
-- **🔄 Columns**: Organize cards in customizable columns (To Do, In Progress, Done, etc.)
-- **👥 User Management**: Simple user authentication and management
+- **🏢 Workspaces API**: RESTful endpoints to create and manage multiple workspaces
+- **📋 Boards Management**: CRUD operations for boards within workspaces
+- **📝 Task Cards**: Complete API for creating, editing, and managing task cards
+- **🔄 Columns**: API endpoints to manage customizable columns (To Do, In Progress, Done, etc.)
+- **👥 User Management**: Authentication and user management endpoints
 - **🔒 Secure**: JWT-based authentication with Supabase integration
-- **🐳 Docker Ready**: Easy deployment with Docker and Docker Compose
-- **⚡ Fast API**: Built on FastAPI for high performance and automatic API documentation
+- **🐳 Docker Ready**: Containerized backend service ready for deployment
+- **⚡ FastAPI**: High performance with automatic OpenAPI/Swagger documentation
+- **📊 Data Models**: Well-structured Pydantic schemas for all entities
 
-## 🛠️ Tech Stack
+## 🛠️ Backend Tech Stack
 
-- **Backend**: FastAPI (Python)
-- **Database**: PostgreSQL with Tortoise ORM
-- **Authentication**: JWT tokens with Supabase
+- **Framework**: FastAPI (Python 3.11+)
+- **ORM**: Tortoise ORM for async database operations
+- **Database**: PostgreSQL
+- **Authentication**: JWT tokens with Supabase integration
+- **API Validation**: Pydantic models for request/response validation
 - **Containerization**: Docker & Docker Compose
-- **API Documentation**: Automatic OpenAPI/Swagger docs
+- **Documentation**: Automatic OpenAPI/Swagger generation
+- **Code Quality**: Black, Flake8, isort, pytest
 
 ## 🚀 Quick Start
 
@@ -64,10 +68,11 @@ A modern, lightweight Kanban board application inspired by Trello, built with Fa
    docker-compose up --build
    ```
 
-4. **Access the application**
-   - API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
-   - Alternative docs: http://localhost:8000/redoc
+4. **Access the API**
+   - **API Base URL**: http://localhost:8000
+   - **Interactive Documentation**: http://localhost:8000/docs
+   - **ReDoc Documentation**: http://localhost:8000/redoc
+   - **API Endpoints**: http://localhost:8000/api/v1/
 
 ## 📁 Project Structure
 
@@ -99,6 +104,18 @@ The API provides the following main endpoints:
 - **Tasks**: `/api/v1/tasks` - Task/card management within columns
 
 Visit `/docs` after starting the server for complete API documentation.
+
+## 💻 About This Backend
+
+This is a **backend API service only**. It provides RESTful endpoints that can be consumed by:
+
+- **Frontend Applications**: React, Vue.js, Angular, or any modern frontend framework
+- **Mobile Apps**: iOS, Android, or cross-platform applications
+- **Desktop Applications**: Electron, Tauri, or native desktop apps
+- **CLI Tools**: Command-line interfaces for task management
+- **Other Services**: Microservices integration or API gateway consumption
+
+The API follows REST principles and returns JSON responses, making it framework-agnostic and easily integrable.
 
 ## 🏗️ Development
 
@@ -176,9 +193,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Inspired by Trello's intuitive task management interface
-- Built with the amazing FastAPI framework
-- Uses Supabase for authentication and real-time features
+- Inspired by Trello's task management system architecture
+- Built with the amazing FastAPI framework for high-performance APIs
+- Uses Supabase for authentication and database services
+- Designed to be consumed by frontend applications (React, Vue, Angular, etc.)
 
 ---
 
