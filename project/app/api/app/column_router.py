@@ -13,3 +13,7 @@ async def create_column(
     column: ColumnCreateSchema, _=Depends(decode_token)
 ) -> ColumnOutputSchema:
     return await ColumnService.create_column(column)
+
+@router.get("/{board_id}", response_model=list[ColumnOutputSchema])
+async def get_all_columns(board_id: int) -> list[ColumnOutputSchema]:
+    return await ColumnService.get_all_columns_by_board_id(board_id)

@@ -50,7 +50,7 @@ class ColumnService:
 
     @staticmethod
     async def get_column_by_name_and_board_id(
-        column: ColumnFilterNameAndBoardIdSchema,
+            column: ColumnFilterNameAndBoardIdSchema,
     ) -> ColumnOutputSchema | None:
         return await ColumnRepository.get_column_by_name_and_board_id(
             ColumnFilterNameAndBoardIdSchema(
@@ -68,3 +68,11 @@ class ColumnService:
             )
 
         return ColumnOutputSchema(**response.__dict__)
+
+    @staticmethod
+    async def get_all_columns_by_board_id(board_id: int) -> list[ColumnOutputSchema] | None:
+        list_column = await ColumnRepository.get_all_column_by_board_id(board_id)
+        columns_output_schema: list[ColumnOutputSchema] = [ColumnOutputSchema(**column.__dict__) for column in
+                                                           list_column]
+
+        return columns_output_schema if columns_output_schema else []

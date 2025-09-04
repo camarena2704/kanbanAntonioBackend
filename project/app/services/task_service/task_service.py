@@ -1,8 +1,15 @@
+from collections import defaultdict
 from app.repositories.task_repository import TaskRepository
+from app.repositories.column_repository import ColumnRepository
 from app.schemas.task_schema import (
     TaskCreateSchema,
+    TaskInputSchema,
     TaskFilterByTitleAndBoard,
     TaskOutputSchema,
+)
+from app.schemas.column_schema import (
+    ColumnWithTasksSchema,
+    ColumnOutputSchema,
 )
 from app.services.column_service.column_service import ColumnService
 from app.services.task_service.task_service_exception import (
@@ -13,29 +20,33 @@ from app.services.task_service.task_service_exception import (
 
 class TaskService:
     @staticmethod
-    async def create_task(task: TaskCreateSchema) -> TaskOutputSchema:
-        # check does not exist title task in board
+    async def create_task(task: TaskInputSchema) -> TaskOutputSchema:
+        # get board_id from column
         column = await ColumnService.get_column_by_id(task.column_id)
         board_id = column.board_id
 
+        # check if task with same title exists in board
         is_exist = await TaskService.get_task_by_title_and_board_id(
             TaskFilterByTitleAndBoard(
                 title=task.title,
                 board_id=board_id,
             )
         )
-
         if is_exist:
             raise TaskServiceException(
                 TaskServiceExceptionInfo.ERROR_EXISTING_TASK_IN_BOARD
             )
 
-        task_copy = task.model_copy()
-        task_copy.title = task.title.strip()
-        task_copy.description = task.description.strip()
+        # calculate next order automatically via repository
+        next_order = await TaskRepository.get_next_order_by_column_id(task.column_id)
 
-        response = await TaskRepository.create_task(task_copy.model_dump())
+        # create schema for insertion
+        task_create = TaskCreateSchema(
+            **task.model_dump(),
+            order=next_order
+        )
 
+        response = await TaskRepository.create_task(task_create.model_dump())
         if not response:
             raise TaskServiceException(TaskServiceExceptionInfo.ERROR_CREATING_TASK)
 
@@ -50,3 +61,30 @@ class TaskService:
                 board_id=task_filter.board_id, title=task_filter.title.strip()
             ).model_dump()
         )
+
+    @staticmethod
+    async def get_columns_with_tasks(board_id: int) -> list[ColumnWithTasksSchema]:
+        # get all columns for board
+        columns = await ColumnRepository.get_all_column_by_board_id(board_id)
+        if not columns:
+            return []
+
+        # get all tasks for board in one query
+        tasks = await TaskRepository.get_all_tasks_by_board_id(board_id)
+
+        # group tasks by column_id
+        tasks_by_column = defaultdict(list)
+        for task in tasks:
+            tasks_by_column[task.column_id].append(TaskOutputSchema(**task.__dict__))
+
+        # build response
+        result = []
+        for column in columns:
+            result.append(
+                ColumnWithTasksSchema(
+                    **ColumnOutputSchema(**column.__dict__).model_dump(),
+                    tasks=tasks_by_column.get(column.id, []),
+                )
+            )
+
+        return result

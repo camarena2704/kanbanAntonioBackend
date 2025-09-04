@@ -1,4 +1,5 @@
 from app.schemas.base_schema import BaseSchema
+from app.schemas.task_schema import TaskOutputSchema
 
 
 class ColumnCreateSchema(BaseSchema):
@@ -9,6 +10,10 @@ class ColumnCreateSchema(BaseSchema):
 
 class ColumnOutputSchema(ColumnCreateSchema):
     id: int
+
+
+class ColumnWithTasksSchema(ColumnOutputSchema):
+    tasks: list[TaskOutputSchema]
 
 
 class ColumnFilterNameAndBoardIdSchema(BaseSchema):
