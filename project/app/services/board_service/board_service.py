@@ -146,12 +146,18 @@ class BoardService:
                 BoardServiceExceptionInfo.ERROR_USER_NOT_CONTAIN_WORKSPACE
             )
 
-        response = await BoardRepository.put_board(
-            {
-                "is_favorite": False if board_model.is_favorite else True,
-            },
-            board_id,
+        is_favorite_board = await BoardService.is_favorite_board(
+            BoardFavoriteSchema(board_id=board_id, user_id=user.id)
         )
+        response = BoardOutputSchema(**board.__dict__)
+
+        if is_favorite_board:
+            await board.users.remove(user)
+            response.is_favorite = False
+        else:
+            await board.users.add(user)
+            response.is_favorite = True
+
         if not response:
             raise BoardServiceException(BoardServiceExceptionInfo.ERROR_UPDATING_BOARD)
 

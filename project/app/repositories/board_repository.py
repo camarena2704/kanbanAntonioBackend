@@ -46,10 +46,7 @@ class BoardRepository:
 
     @staticmethod
     async def is_favorite_board(payload: dict) -> bool:
-        return await DatabaseModule.get_entity_filtered(
-            Board,
-            {
-                "users__board_id": payload.get("board_id"),
-                "users__user_id": payload.get("user_id"),
-            },
-        )
+        return await Board.filter(
+            id=payload.get("board_id"),
+            users__id=payload.get("user_id"),
+        ).exists()
