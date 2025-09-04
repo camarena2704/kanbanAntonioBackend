@@ -1,7 +1,7 @@
 from tortoise.expressions import Q
 
 from app.modules.database_module import DatabaseModule
-from app.modules.database_module.models.default import Board
+from app.modules.database_module.models.default import Board, User
 
 
 class BoardRepository:
@@ -45,8 +45,13 @@ class BoardRepository:
         return await DatabaseModule.get_entity(Board, identifier)
 
     @staticmethod
-    async def is_favorite_board(payload: dict) -> bool:
-        return await Board.filter(
-            id=payload.get("board_id"),
-            users__id=payload.get("user_id"),
-        ).exists()
+    async def is_favorite_board(board_id: int, user_id: int) -> bool:
+        return await Board.filter(id=board_id, users__id=user_id).exists()
+
+    @staticmethod
+    async def add_user_to_favorites(board: Board, user: User) -> None:
+        await board.users.add(user)
+
+    @staticmethod
+    async def remove_user_from_favorites(board: Board, user: User) -> None:
+        await board.users.remove(user)
