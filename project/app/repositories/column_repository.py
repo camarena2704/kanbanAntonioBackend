@@ -1,3 +1,5 @@
+from tortoise.functions import Max
+
 from app.modules.database_module import DatabaseModule
 from app.modules.database_module.models.default import Column
 
@@ -20,4 +22,21 @@ class ColumnRepository:
 
     @staticmethod
     async def get_all_column_by_board_id(board_id: int) -> list[Column] | None:
-        return await DatabaseModule.get_all_entity_filtered(Column, {"board_id": board_id})
+        return await DatabaseModule.get_all_entity_filtered(
+            Column, {"board_id": board_id}
+        )
+
+    @staticmethod
+    async def get_next_order_by_board_id(board_id: int) -> int:
+        # Get the maximum order in the board
+        result = (
+            await Column.filter(board_id=board_id)
+            .annotate(max_order=Max("order"))
+            .values("max_order")
+        )
+        max_order = (
+            result[0]["max_order"]
+            if result and result[0]["max_order"] is not None
+            else 0
+        )
+        return max_order + 1

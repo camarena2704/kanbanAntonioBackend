@@ -1,5 +1,7 @@
 from datetime import datetime
+
 from app.schemas.base_schema import BaseSchema
+
 
 # Input schema (user does not provide order)
 class TaskInputSchema(BaseSchema):

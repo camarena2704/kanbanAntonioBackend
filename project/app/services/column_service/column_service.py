@@ -2,8 +2,8 @@ from tortoise.exceptions import IntegrityError
 
 from app.repositories.column_repository import ColumnRepository
 from app.schemas.column_schema import (
-    ColumnCreateSchema,
     ColumnFilterNameAndBoardIdSchema,
+    ColumnInputSchema,
     ColumnOutputSchema,
 )
 from app.services.column_service.column_service_exception import (
@@ -14,7 +14,7 @@ from app.services.column_service.column_service_exception import (
 
 class ColumnService:
     @staticmethod
-    async def create_column(column: ColumnCreateSchema) -> ColumnOutputSchema:
+    async def create_column(column: ColumnInputSchema) -> ColumnOutputSchema:
         # check does not exist column in board with equals name
         is_exist = await ColumnService.get_column_by_name_and_board_id(
             ColumnFilterNameAndBoardIdSchema(name=column.name, board_id=column.board_id)
@@ -24,16 +24,17 @@ class ColumnService:
                 ColumnServiceExceptionInfo.ERROR_EXISTING_COLUMN_IN_BOARD
             )
 
+        # get next order automatically
+        next_order = await ColumnRepository.get_next_order_by_board_id(column.board_id)
+
         # create column
         try:
-            correct_column = ColumnCreateSchema(
-                name=column.name.strip(),
-                order=column.order,
-                board_id=column.board_id,
-            )
-            created_column = await ColumnRepository.create_column(
-                correct_column.model_dump()
-            )
+            payload = {
+                "name": column.name.strip(),
+                "order": next_order,
+                "board_id": column.board_id,
+            }
+            created_column = await ColumnRepository.create_column(payload)
         except IntegrityError as e:
             if "columns_board_id_fkey" in str(e):
                 raise ColumnServiceException(
@@ -50,7 +51,7 @@ class ColumnService:
 
     @staticmethod
     async def get_column_by_name_and_board_id(
-            column: ColumnFilterNameAndBoardIdSchema,
+        column: ColumnFilterNameAndBoardIdSchema,
     ) -> ColumnOutputSchema | None:
         return await ColumnRepository.get_column_by_name_and_board_id(
             ColumnFilterNameAndBoardIdSchema(
@@ -70,9 +71,12 @@ class ColumnService:
         return ColumnOutputSchema(**response.__dict__)
 
     @staticmethod
-    async def get_all_columns_by_board_id(board_id: int) -> list[ColumnOutputSchema] | None:
+    async def get_all_columns_by_board_id(
+        board_id: int,
+    ) -> list[ColumnOutputSchema] | None:
         list_column = await ColumnRepository.get_all_column_by_board_id(board_id)
-        columns_output_schema: list[ColumnOutputSchema] = [ColumnOutputSchema(**column.__dict__) for column in
-                                                           list_column]
+        columns_output_schema: list[ColumnOutputSchema] = [
+            ColumnOutputSchema(**column.__dict__) for column in list_column
+        ]
 
         return columns_output_schema if columns_output_schema else []

@@ -25,6 +25,14 @@ class TaskRepository:
 
     @staticmethod
     async def get_next_order_by_column_id(column_id: int) -> int:
-        result = await Task.filter(column_id=column_id).annotate(max_order=Max("order")).values("max_order")
-        max_order = result[0]["max_order"] if result and result[0]["max_order"] is not None else 0
+        result = (
+            await Task.filter(column_id=column_id)
+            .annotate(max_order=Max("order"))
+            .values("max_order")
+        )
+        max_order = (
+            result[0]["max_order"]
+            if result and result[0]["max_order"] is not None
+            else 0
+        )
         return max_order + 1

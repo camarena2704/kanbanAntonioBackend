@@ -1,15 +1,16 @@
 from collections import defaultdict
-from app.repositories.task_repository import TaskRepository
+
 from app.repositories.column_repository import ColumnRepository
+from app.repositories.task_repository import TaskRepository
+from app.schemas.column_schema import (
+    ColumnOutputSchema,
+    ColumnWithTasksSchema,
+)
 from app.schemas.task_schema import (
     TaskCreateSchema,
-    TaskInputSchema,
     TaskFilterByTitleAndBoard,
+    TaskInputSchema,
     TaskOutputSchema,
-)
-from app.schemas.column_schema import (
-    ColumnWithTasksSchema,
-    ColumnOutputSchema,
 )
 from app.services.column_service.column_service import ColumnService
 from app.services.task_service.task_service_exception import (
@@ -41,10 +42,7 @@ class TaskService:
         next_order = await TaskRepository.get_next_order_by_column_id(task.column_id)
 
         # create schema for insertion
-        task_create = TaskCreateSchema(
-            **task.model_dump(),
-            order=next_order
-        )
+        task_create = TaskCreateSchema(**task.model_dump(), order=next_order)
 
         response = await TaskRepository.create_task(task_create.model_dump())
         if not response:

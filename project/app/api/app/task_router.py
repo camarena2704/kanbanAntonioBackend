@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.core.security.decode_token import decode_token
 from app.schemas.column_schema import ColumnWithTasksSchema
-from app.schemas.task_schema import TaskOutputSchema, TaskInputSchema
+from app.schemas.task_schema import TaskInputSchema, TaskOutputSchema
 from app.services.task_service.task_service import TaskService
 
 router = APIRouter()
