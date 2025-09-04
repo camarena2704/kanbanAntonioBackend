@@ -1,3 +1,5 @@
+from tortoise.expressions import Q
+
 from app.modules.database_module import DatabaseModule
 from app.modules.database_module.models.default import Board
 
@@ -22,10 +24,12 @@ class BoardRepository:
         filters: dict,
         page: int,
         limit: int,
+        query: Q = None,
         order: str = "updated_at",
     ) -> tuple[list[Board], int] | None:
         return await DatabaseModule.get_all_entity_filtered_paginated(
             Board,
+            q=query,
             filters=filters,
             page=page,
             limit=limit,
@@ -39,3 +43,13 @@ class BoardRepository:
     @staticmethod
     async def get_board_by_identifier(identifier: int) -> Board | None:
         return await DatabaseModule.get_entity(Board, identifier)
+
+    @staticmethod
+    async def is_favorite_board(payload: dict) -> bool:
+        return await DatabaseModule.get_entity_filtered(
+            Board,
+            {
+                "users__board_id": payload.get("board_id"),
+                "users__user_id": payload.get("user_id"),
+            },
+        )

@@ -1,6 +1,9 @@
+from tortoise.expressions import Q
+
 from app.repositories.board_repository import BoardRepository
 from app.schemas.board_schema import (
     BoardCreateSchema,
+    BoardFavoriteSchema,
     BoardFilterByNameSchema,
     BoardOutputSchema,
     BoardPaginateSchema,
@@ -43,14 +46,19 @@ class BoardService:
 
         correct_board = BoardCreateSchema(
             name=board.name.strip(),
-            is_favourite=board.is_favourite,
             workspace_id=board.workspace_id,
         )
 
         response = await BoardRepository.create_board(correct_board.model_dump())
         if not response:
             raise BoardServiceException(BoardServiceExceptionInfo.ERROR_CREATING_BOARD)
-        return BoardOutputSchema(**response.__dict__)
+
+        board_schema: BoardOutputSchema = BoardOutputSchema(**response.__dict__)
+        if board.is_favorite:
+            await response.users.add(user)
+            board_schema.is_favorite = True
+
+        return board_schema
 
     @staticmethod
     async def get_board_by_name_and_workspace_id(
@@ -82,14 +90,24 @@ class BoardService:
                 BoardServiceExceptionInfo.ERROR_USER_NOT_CONTAIN_WORKSPACE
             )
 
-        response = await BoardRepository.get_all_board_filter_paginate_by_workspace_id(
-            {
-                "workspace_id": workspace_id,
-                "is_favorite": is_favourite,
-            },
-            page,
-            limit,
-        )
+        if is_favourite:
+            response = (
+                await BoardRepository.get_all_board_filter_paginate_by_workspace_id(
+                    {"workspace_id": workspace_id, "users__id": user.id},
+                    page,
+                    limit,
+                )
+            )
+        else:
+
+            response = (
+                await BoardRepository.get_all_board_filter_paginate_by_workspace_id(
+                    {"workspace_id": workspace_id},
+                    page,
+                    limit,
+                    query=Q(workspace_id=workspace_id) & ~Q(users__id=user.id),
+                )
+            )
 
         if not response:
             return BoardPaginateSchema(total=0, data=[])
@@ -138,3 +156,7 @@ class BoardService:
             raise BoardServiceException(BoardServiceExceptionInfo.ERROR_UPDATING_BOARD)
 
         return BoardOutputSchema(**response.__dict__)
+
+    @staticmethod
+    async def is_favorite_board(favorite_schema: BoardFavoriteSchema) -> bool:
+        return await BoardRepository.is_favorite_board(favorite_schema.model_dump())

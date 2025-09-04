@@ -50,7 +50,6 @@ class WorkspaceService:
     async def get_workspace_by_name(
         workspace_filtered: WorkspaceCreateSchema,
     ) -> WorkspaceOutputSchema | None:
-        print(workspace_filtered)
         return await WorkspaceRepository.get_workspace_by_name(
             workspace_filtered.model_dump()
         )

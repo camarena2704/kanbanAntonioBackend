@@ -24,3 +24,8 @@ class BoardFilterByNameSchema(BaseSchema):
 class BoardPaginateSchema(BaseSchema):
     data: list[BoardOutputSchema]
     total: int
+
+
+class BoardFavoriteSchema(BaseSchema):
+    board_id: int
+    user_id: int
