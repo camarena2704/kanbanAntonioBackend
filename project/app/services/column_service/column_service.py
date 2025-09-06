@@ -5,6 +5,7 @@ from app.schemas.column_schema import (
     ColumnFilterNameAndBoardIdSchema,
     ColumnInputSchema,
     ColumnOutputSchema,
+    ColumnUpdateOrderSchema,
 )
 from app.services.column_service.column_service_exception import (
     ColumnServiceException,
@@ -80,3 +81,21 @@ class ColumnService:
         ]
 
         return columns_output_schema if columns_output_schema else []
+
+    @staticmethod
+    async def move_column(update_column: ColumnUpdateOrderSchema) -> ColumnOutputSchema:
+        column = await ColumnService.get_column_by_id(update_column.id)
+        updated_column = await ColumnRepository.update_column_order(
+            {
+                "order": column.order,
+                "column_id": column.id,
+                "new_order": update_column.new_order,
+                "board_id": column.board_id,
+            }
+        )
+        if not updated_column:
+            raise ColumnServiceException(
+                ColumnServiceExceptionInfo.ERROR_UPDATING_COLUMN
+            )
+
+        return ColumnOutputSchema(**updated_column.__dict__)

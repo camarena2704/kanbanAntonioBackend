@@ -25,3 +25,8 @@ class ColumnWithTasksSchema(ColumnOutputSchema):
 class ColumnFilterNameAndBoardIdSchema(BaseSchema):
     name: str
     board_id: int
+
+
+class ColumnUpdateOrderSchema(BaseSchema):
+    id: int
+    new_order: int

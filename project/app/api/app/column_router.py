@@ -2,7 +2,11 @@ from fastapi import APIRouter
 from fastapi.params import Depends
 
 from app.core.security.decode_token import decode_token
-from app.schemas.column_schema import ColumnInputSchema, ColumnOutputSchema
+from app.schemas.column_schema import (
+    ColumnInputSchema,
+    ColumnOutputSchema,
+    ColumnUpdateOrderSchema,
+)
 from app.services.column_service.column_service import ColumnService
 
 router = APIRouter()
@@ -18,3 +22,10 @@ async def create_column(
 @router.get("/{board_id}", response_model=list[ColumnOutputSchema])
 async def get_all_columns(board_id: int) -> list[ColumnOutputSchema]:
     return await ColumnService.get_all_columns_by_board_id(board_id)
+
+
+@router.put("/move", response_model=ColumnOutputSchema)
+async def move_column(
+    column_info: ColumnUpdateOrderSchema, _=Depends(decode_token)
+) -> ColumnOutputSchema:
+    return await ColumnService.move_column(column_info)

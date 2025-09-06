@@ -1,3 +1,4 @@
+from tortoise.expressions import F
 from tortoise.functions import Max
 
 from app.modules.database_module import DatabaseModule
@@ -40,3 +41,24 @@ class ColumnRepository:
             else 0
         )
         return max_order + 1
+
+    @staticmethod
+    async def update_column_order(payload: dict) -> Column | None:
+        old_order = payload.get("order")
+        new_order = payload.get("new_order")
+        column_id = payload.get("column_id")
+        board_id = payload.get("board_id")
+        if new_order < old_order:
+            await Column.filter(
+                board_id=board_id,
+                order__gte=new_order,
+                order__lt=old_order,
+            ).update(order=F("order") + 1)
+        elif new_order > old_order:
+            await Column.filter(
+                board_id=board_id,
+                order__lte=new_order,
+                order__gt=old_order,
+            ).update(order=F("order") - 1)
+
+        return await DatabaseModule.put_entity(Column, {"order": new_order}, column_id)
