@@ -30,3 +30,7 @@ class ColumnFilterNameAndBoardIdSchema(BaseSchema):
 class ColumnUpdateOrderSchema(BaseSchema):
     id: int
     new_order: int
+
+class ColumnUpdateNameSchema(BaseSchema):
+    id: int
+    new_name: str

@@ -62,3 +62,15 @@ class ColumnRepository:
             ).update(order=F("order") - 1)
 
         return await DatabaseModule.put_entity(Column, {"order": new_order}, column_id)
+
+    @staticmethod
+    async def update_name_column(payload: dict) -> Column | None:
+        name = payload.get("new_name")
+        column_id = payload.get("id")
+        return await DatabaseModule.put_entity(
+            Column,
+            {
+                "name": name,
+            },
+            column_id,
+        )

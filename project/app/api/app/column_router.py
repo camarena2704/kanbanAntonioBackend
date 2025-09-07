@@ -5,7 +5,7 @@ from app.core.security.decode_token import decode_token
 from app.schemas.column_schema import (
     ColumnInputSchema,
     ColumnOutputSchema,
-    ColumnUpdateOrderSchema,
+    ColumnUpdateOrderSchema, ColumnUpdateNameSchema,
 )
 from app.services.column_service.column_service import ColumnService
 
@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.post("/", response_model=ColumnOutputSchema)
 async def create_column(
-    column: ColumnInputSchema, _=Depends(decode_token)
+        column: ColumnInputSchema, _=Depends(decode_token)
 ) -> ColumnOutputSchema:
     return await ColumnService.create_column(column)
 
@@ -26,6 +26,11 @@ async def get_all_columns(board_id: int) -> list[ColumnOutputSchema]:
 
 @router.put("/move", response_model=ColumnOutputSchema)
 async def move_column(
-    column_info: ColumnUpdateOrderSchema, _=Depends(decode_token)
+        column_info: ColumnUpdateOrderSchema, _=Depends(decode_token)
 ) -> ColumnOutputSchema:
     return await ColumnService.move_column(column_info)
+
+
+@router.put("/change-name", response_model=ColumnOutputSchema)
+async def update_column_name(column: ColumnUpdateNameSchema, _=Depends(decode_token)) -> ColumnOutputSchema:
+    return await ColumnService.update_column_name(column)

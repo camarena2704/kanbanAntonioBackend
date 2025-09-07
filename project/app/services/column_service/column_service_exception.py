@@ -7,7 +7,7 @@ class ColumnServiceExceptionInfo(BaseExceptionInfo):
     ERROR_USER_NOT_CONTAIN_BOARD = (4003, "User does not belong to this board", 400)
     ERROR_COLUMN_NOT_FOUND = (4004, "Column not found", 404)
     ERROR_UPDATING_COLUMN = (4005, "Error updating column", 500)
-
+    ERROR_INVALID_COLUMN_NAME = (4006, "Invalid column name", 400)
 
 class ColumnServiceException(BaseException):
     pass

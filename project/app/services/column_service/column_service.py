@@ -6,19 +6,26 @@ from app.schemas.column_schema import (
     ColumnInputSchema,
     ColumnOutputSchema,
     ColumnUpdateOrderSchema,
+    ColumnUpdateNameSchema,
 )
 from app.services.column_service.column_service_exception import (
     ColumnServiceException,
     ColumnServiceExceptionInfo,
 )
+from app.utils.string_helper import StringHelper
 
 
 class ColumnService:
     @staticmethod
     async def create_column(column: ColumnInputSchema) -> ColumnOutputSchema:
-        # check does not exist column in board with equals name
+        # clean and validate the name
+        clean_name = StringHelper.normalize_and_validate(column.name)
+        if not clean_name:
+            raise ColumnServiceException(ColumnServiceExceptionInfo.ERROR_INVALID_COLUMN_NAME)
+
+        # check column with same name does not already exist in board
         is_exist = await ColumnService.get_column_by_name_and_board_id(
-            ColumnFilterNameAndBoardIdSchema(name=column.name, board_id=column.board_id)
+            ColumnFilterNameAndBoardIdSchema(name=clean_name, board_id=column.board_id)
         )
         if is_exist:
             raise ColumnServiceException(
@@ -31,7 +38,7 @@ class ColumnService:
         # create column
         try:
             payload = {
-                "name": column.name.strip(),
+                "name": clean_name,
                 "order": next_order,
                 "board_id": column.board_id,
             }
@@ -54,9 +61,14 @@ class ColumnService:
     async def get_column_by_name_and_board_id(
         column: ColumnFilterNameAndBoardIdSchema,
     ) -> ColumnOutputSchema | None:
+        # clean and validate the name
+        clean_name = StringHelper.normalize_and_validate(column.name)
+        if not clean_name:
+            return None
+
         return await ColumnRepository.get_column_by_name_and_board_id(
             ColumnFilterNameAndBoardIdSchema(
-                name=column.name.strip(), board_id=column.board_id
+                name=clean_name, board_id=column.board_id
             ).model_dump()
         )
 
@@ -99,3 +111,34 @@ class ColumnService:
             )
 
         return ColumnOutputSchema(**updated_column.__dict__)
+
+    @staticmethod
+    async def update_column_name(column_schema: ColumnUpdateNameSchema) -> ColumnOutputSchema:
+        # clean and validate the name
+        clean_name = StringHelper.normalize_and_validate(column_schema.new_name)
+        if not clean_name:
+            raise ColumnServiceException(ColumnServiceExceptionInfo.ERROR_INVALID_COLUMN_NAME)
+
+        # get current column by ID
+        column = await ColumnService.get_column_by_id(column_schema.id)
+
+        # check if the new name already exists in the same board
+        is_exist = await ColumnService.get_column_by_name_and_board_id(
+            ColumnFilterNameAndBoardIdSchema(name=clean_name, board_id=column.board_id)
+        )
+        if is_exist:
+            raise ColumnServiceException(
+                ColumnServiceExceptionInfo.ERROR_EXISTING_COLUMN_IN_BOARD
+            )
+
+        # update column name
+        response = await ColumnRepository.update_name_column(
+            {**column_schema.model_dump(), "new_name": clean_name}
+        )
+
+        # check if update failed
+        if not response:
+            raise ColumnServiceException(ColumnServiceExceptionInfo.ERROR_UPDATING_COLUMN)
+
+        # return updated column
+        return ColumnOutputSchema(**response.__dict__)
