@@ -5,8 +5,8 @@ from app.schemas.column_schema import (
     ColumnFilterNameAndBoardIdSchema,
     ColumnInputSchema,
     ColumnOutputSchema,
-    ColumnUpdateOrderSchema,
     ColumnUpdateNameSchema,
+    ColumnUpdateOrderSchema,
 )
 from app.services.column_service.column_service_exception import (
     ColumnServiceException,
@@ -21,7 +21,9 @@ class ColumnService:
         # clean and validate the name
         clean_name = StringHelper.normalize_and_validate(column.name)
         if not clean_name:
-            raise ColumnServiceException(ColumnServiceExceptionInfo.ERROR_INVALID_COLUMN_NAME)
+            raise ColumnServiceException(
+                ColumnServiceExceptionInfo.ERROR_INVALID_COLUMN_NAME
+            )
 
         # check column with same name does not already exist in board
         is_exist = await ColumnService.get_column_by_name_and_board_id(
@@ -113,11 +115,15 @@ class ColumnService:
         return ColumnOutputSchema(**updated_column.__dict__)
 
     @staticmethod
-    async def update_column_name(column_schema: ColumnUpdateNameSchema) -> ColumnOutputSchema:
+    async def update_column_name(
+        column_schema: ColumnUpdateNameSchema,
+    ) -> ColumnOutputSchema:
         # clean and validate the name
         clean_name = StringHelper.normalize_and_validate(column_schema.new_name)
         if not clean_name:
-            raise ColumnServiceException(ColumnServiceExceptionInfo.ERROR_INVALID_COLUMN_NAME)
+            raise ColumnServiceException(
+                ColumnServiceExceptionInfo.ERROR_INVALID_COLUMN_NAME
+            )
 
         # get current column by ID
         column = await ColumnService.get_column_by_id(column_schema.id)
@@ -138,7 +144,9 @@ class ColumnService:
 
         # check if update failed
         if not response:
-            raise ColumnServiceException(ColumnServiceExceptionInfo.ERROR_UPDATING_COLUMN)
+            raise ColumnServiceException(
+                ColumnServiceExceptionInfo.ERROR_UPDATING_COLUMN
+            )
 
         # return updated column
         return ColumnOutputSchema(**response.__dict__)

@@ -49,10 +49,15 @@ class GenericDao:
 
     @classmethod
     async def get_all_entity_filtered(
-        cls, model: Type[DatabaseModel], filters: dict = None
+        cls, model: Type[DatabaseModel], filters: dict = None, order: str = None
     ) -> list[DatabaseModel] | None:
         filters = filters if filters else {}
-        return await model.filter(**filters).all()
+        data = model.filter(**filters).all()
+
+        if order:
+            data = data.order_by(order)
+
+        return await data
 
     @classmethod
     async def get_all_entity_filtered_paginated(

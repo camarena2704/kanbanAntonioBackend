@@ -9,5 +9,6 @@ class ColumnServiceExceptionInfo(BaseExceptionInfo):
     ERROR_UPDATING_COLUMN = (4005, "Error updating column", 500)
     ERROR_INVALID_COLUMN_NAME = (4006, "Invalid column name", 400)
 
+
 class ColumnServiceException(BaseException):
     pass

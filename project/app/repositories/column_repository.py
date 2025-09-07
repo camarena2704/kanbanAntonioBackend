@@ -24,7 +24,7 @@ class ColumnRepository:
     @staticmethod
     async def get_all_column_by_board_id(board_id: int) -> list[Column] | None:
         return await DatabaseModule.get_all_entity_filtered(
-            Column, {"board_id": board_id}
+            Column, {"board_id": board_id}, "order"
         )
 
     @staticmethod
