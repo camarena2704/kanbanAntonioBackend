@@ -150,3 +150,21 @@ class ColumnService:
 
         # return updated column
         return ColumnOutputSchema(**response.__dict__)
+
+    @staticmethod
+    async def delete_column(column_id: int) -> ColumnOutputSchema:
+        column = await ColumnService.get_column_by_id(column_id)
+
+        if not column:
+            raise ColumnServiceException(
+                ColumnServiceExceptionInfo.ERROR_COLUMN_NOT_FOUND
+            )
+
+        response = await ColumnRepository.delete_column(column_id)
+
+        if not response:
+            raise ColumnServiceException(
+                ColumnServiceExceptionInfo.ERROR_DELETING_COLUMN
+            )
+
+        return ColumnOutputSchema(**response.__dict__)

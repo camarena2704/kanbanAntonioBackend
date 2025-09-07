@@ -74,3 +74,7 @@ class ColumnRepository:
             },
             column_id,
         )
+
+    @staticmethod
+    async def delete_column(column_id: int) -> Column | None:
+        return await DatabaseModule.remove_entity(Column, column_id)

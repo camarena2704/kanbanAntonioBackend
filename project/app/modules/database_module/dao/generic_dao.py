@@ -92,3 +92,11 @@ class GenericDao:
 
         await entity.save()
         return entity
+
+    @classmethod
+    async def remove_entity(
+        cls, model: Type[DatabaseModel], identifier: int
+    ) -> DatabaseModel | None:
+        entity = await model.filter(id=identifier).first()
+        await model.filter(id=identifier).delete()
+        return entity

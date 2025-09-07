@@ -8,6 +8,7 @@ class ColumnServiceExceptionInfo(BaseExceptionInfo):
     ERROR_COLUMN_NOT_FOUND = (4004, "Column not found", 404)
     ERROR_UPDATING_COLUMN = (4005, "Error updating column", 500)
     ERROR_INVALID_COLUMN_NAME = (4006, "Invalid column name", 400)
+    ERROR_DELETING_COLUMN = (4007, "Error deleting column", 500)
 
 
 class ColumnServiceException(BaseException):

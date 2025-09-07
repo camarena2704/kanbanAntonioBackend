@@ -37,3 +37,8 @@ async def update_column_name(
     column: ColumnUpdateNameSchema, _=Depends(decode_token)
 ) -> ColumnOutputSchema:
     return await ColumnService.update_column_name(column)
+
+
+@router.delete("/{column_id}", response_model=ColumnOutputSchema)
+async def delete_column(column_id: int, _=Depends(decode_token)) -> ColumnOutputSchema:
+    return await ColumnService.delete_column(column_id)
