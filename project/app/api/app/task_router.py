@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.post("/", response_model=TaskOutputSchema)
 async def create_task(
-    task: TaskInputSchema, _=Depends(decode_token)
+        task: TaskInputSchema, _=Depends(decode_token)
 ) -> TaskOutputSchema:
     return await TaskService.create_task(task)
 
@@ -26,6 +26,11 @@ async def get_columns_with_tasks(board_id: int, _=Depends(decode_token)):
 
 @router.put("/move", response_model=TaskOutputSchema)
 async def move_column(
-    task_info: TaskUpdateOrderSchema, _=Depends(decode_token)
+        task_info: TaskUpdateOrderSchema, _=Depends(decode_token)
 ) -> TaskOutputSchema:
     return await TaskService.move_task(task_info)
+
+
+@router.delete("/{task_id}", response_model=TaskOutputSchema)
+async def delete_task(task_id: int, _=Depends(decode_token)):
+    return await TaskService.delete_task(task_id)

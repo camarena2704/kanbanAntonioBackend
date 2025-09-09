@@ -51,3 +51,7 @@ class TaskRepository:
         return await OrderHelper.reorder_entity(
             Task, task_id, "column_id", column_id, old_order, new_order
         )
+
+    @staticmethod
+    async def delete_task(task_id: int) -> Task | None:
+        return await DatabaseModule.remove_entity(Task, task_id)

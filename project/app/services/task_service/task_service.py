@@ -110,3 +110,17 @@ class TaskService:
             raise TaskServiceException(TaskServiceExceptionInfo.ERROR_UPDATING_TASK)
 
         return TaskOutputSchema(**updated_task.__dict__)
+
+    @staticmethod
+    async def delete_task(task_id: int) -> TaskOutputSchema:
+        task = await TaskService.get_task_by_id(task_id)
+
+        if not task:
+            raise TaskServiceException(TaskServiceExceptionInfo.ERROR_TASK_NOT_FOUND)
+
+        response = await TaskRepository.delete_task(task_id)
+
+        if not response:
+            raise TaskServiceException(TaskServiceExceptionInfo.ERROR_DELETING_TASK)
+
+        return TaskOutputSchema(**response.__dict__)

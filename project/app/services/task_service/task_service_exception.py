@@ -10,6 +10,7 @@ class TaskServiceExceptionInfo(BaseExceptionInfo):
     )
     ERROR_TASK_NOT_FOUND = (5003, "Error creating task", 404)
     ERROR_UPDATING_TASK = (5004, "Error updating task", 500)
+    ERROR_DELETING_TASK = (5004, "Error deleting task", 500)
 
 
 class TaskServiceException(BaseException):
