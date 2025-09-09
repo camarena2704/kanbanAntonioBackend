@@ -1,8 +1,8 @@
-from tortoise.expressions import F
 from tortoise.functions import Max
 
 from app.modules.database_module import DatabaseModule
 from app.modules.database_module.models.default import Column
+from app.utils.order_helper import OrderHelper
 
 
 class ColumnRepository:
@@ -48,20 +48,9 @@ class ColumnRepository:
         new_order = payload.get("new_order")
         column_id = payload.get("column_id")
         board_id = payload.get("board_id")
-        if new_order < old_order:
-            await Column.filter(
-                board_id=board_id,
-                order__gte=new_order,
-                order__lt=old_order,
-            ).update(order=F("order") + 1)
-        elif new_order > old_order:
-            await Column.filter(
-                board_id=board_id,
-                order__lte=new_order,
-                order__gt=old_order,
-            ).update(order=F("order") - 1)
-
-        return await DatabaseModule.put_entity(Column, {"order": new_order}, column_id)
+        return await OrderHelper.reorder_entity(
+            Column, column_id, "board_id", board_id, old_order, new_order
+        )
 
     @staticmethod
     async def update_name_column(payload: dict) -> Column | None:

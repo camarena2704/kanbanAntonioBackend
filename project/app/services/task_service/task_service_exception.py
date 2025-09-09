@@ -8,6 +8,8 @@ class TaskServiceExceptionInfo(BaseExceptionInfo):
         "Error already existing task in this board",
         400,
     )
+    ERROR_TASK_NOT_FOUND = (5003, "Error creating task", 404)
+    ERROR_UPDATING_TASK = (5004, "Error updating task", 500)
 
 
 class TaskServiceException(BaseException):

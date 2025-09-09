@@ -11,6 +11,7 @@ from app.schemas.task_schema import (
     TaskFilterByTitleAndBoard,
     TaskInputSchema,
     TaskOutputSchema,
+    TaskUpdateOrderSchema,
 )
 from app.services.column_service.column_service import ColumnService
 from app.services.task_service.task_service_exception import (
@@ -86,3 +87,26 @@ class TaskService:
             )
 
         return result
+
+    @staticmethod
+    async def get_task_by_id(task_id: int) -> TaskOutputSchema:
+        response = await TaskRepository.get_task_by_id(task_id)
+        if not response:
+            raise TaskServiceException(TaskServiceExceptionInfo.ERROR_TASK_NOT_FOUND)
+        return TaskOutputSchema(**response.__dict__)
+
+    @staticmethod
+    async def move_task(update_task: TaskUpdateOrderSchema) -> TaskOutputSchema:
+        task = await TaskService.get_task_by_id(update_task.id)
+        updated_task = await TaskRepository.update_order_task(
+            {
+                "order": task.order,
+                "task_id": task.id,
+                "new_order": update_task.new_order,
+                "column_id": task.column_id,
+            }
+        )
+        if not updated_task:
+            raise TaskServiceException(TaskServiceExceptionInfo.ERROR_UPDATING_TASK)
+
+        return TaskOutputSchema(**updated_task.__dict__)

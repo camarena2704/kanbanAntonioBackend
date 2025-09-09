@@ -2,6 +2,7 @@ from tortoise.functions import Max
 
 from app.modules.database_module import DatabaseModule
 from app.modules.database_module.models.default import Task
+from app.utils.order_helper import OrderHelper
 
 
 class TaskRepository:
@@ -36,3 +37,17 @@ class TaskRepository:
             else 0
         )
         return max_order + 1
+
+    @staticmethod
+    async def get_task_by_id(task_id: int) -> Task | None:
+        return await DatabaseModule.get_entity_filtered(Task, {"id": task_id})
+
+    @staticmethod
+    async def update_order_task(payload: dict) -> Task | None:
+        old_order = payload.get("order")
+        new_order = payload.get("new_order")
+        column_id = payload.get("column_id")
+        task_id = payload.get("task_id")
+        return await OrderHelper.reorder_entity(
+            Task, task_id, "column_id", column_id, old_order, new_order
+        )
