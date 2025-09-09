@@ -12,12 +12,14 @@ from app.schemas.task_schema import (
     TaskInputSchema,
     TaskOutputSchema,
     TaskUpdateOrderSchema,
+    TaskUpdateSchema,
 )
 from app.services.column_service.column_service import ColumnService
 from app.services.task_service.task_service_exception import (
     TaskServiceException,
     TaskServiceExceptionInfo,
 )
+from app.utils.string_helper import StringHelper
 
 
 class TaskService:
@@ -53,7 +55,7 @@ class TaskService:
 
     @staticmethod
     async def get_task_by_title_and_board_id(
-        task_filter: TaskFilterByTitleAndBoard,
+            task_filter: TaskFilterByTitleAndBoard,
     ) -> TaskOutputSchema | None:
         return await TaskRepository.get_task_by_title_and_board_id(
             TaskFilterByTitleAndBoard(
@@ -113,14 +115,44 @@ class TaskService:
 
     @staticmethod
     async def delete_task(task_id: int) -> TaskOutputSchema:
-        task = await TaskService.get_task_by_id(task_id)
-
-        if not task:
-            raise TaskServiceException(TaskServiceExceptionInfo.ERROR_TASK_NOT_FOUND)
-
+        await TaskService.get_task_by_id(task_id)
         response = await TaskRepository.delete_task(task_id)
 
         if not response:
             raise TaskServiceException(TaskServiceExceptionInfo.ERROR_DELETING_TASK)
+
+        return TaskOutputSchema(**response.__dict__)
+
+    @staticmethod
+    async def update_task(task_schema: TaskUpdateSchema) -> TaskOutputSchema:
+        task = await TaskService.get_task_by_id(task_schema.id)
+
+        title = StringHelper.normalize_and_validate(task_schema.title)
+        if title:
+            column = await ColumnService.get_column_by_id(task.column_id)
+            board_id = column.board_id
+            task_aux = await TaskService.get_task_by_title_and_board_id(
+                TaskFilterByTitleAndBoard(
+                    title=title,
+                    board_id=board_id
+                ))
+
+            if task_aux:
+                raise TaskServiceException(TaskServiceExceptionInfo.ERROR_EXISTING_TASK_IN_BOARD)
+        else:
+            title = task.title
+
+        description = StringHelper.normalize_and_validate(task_schema.description) or task.description
+
+        task_normalize_data = TaskUpdateSchema(
+            id=task.id,
+            title=title,
+            description=description,
+        )
+
+        response = await TaskRepository.update_task(task_normalize_data.model_dump())
+
+        if not response:
+            raise TaskServiceException(TaskServiceExceptionInfo.ERROR_UPDATING_TASK)
 
         return TaskOutputSchema(**response.__dict__)

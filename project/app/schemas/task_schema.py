@@ -32,3 +32,9 @@ class TaskFilterByTitleAndBoard(BaseSchema):
 class TaskUpdateOrderSchema(BaseSchema):
     id: int
     new_order: int = Field(gt=0)
+
+
+class TaskUpdateSchema(BaseSchema):
+    id: int
+    title: str
+    description: str

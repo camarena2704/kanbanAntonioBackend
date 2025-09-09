@@ -1,5 +1,4 @@
-from fastapi import APIRouter
-from fastapi.params import Depends
+from fastapi import APIRouter, Depends
 
 from app.core.security.decode_token import decode_token
 from app.schemas.auth_schema import AuthDataOutputSchema

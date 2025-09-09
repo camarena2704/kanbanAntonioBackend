@@ -55,3 +55,12 @@ class TaskRepository:
     @staticmethod
     async def delete_task(task_id: int) -> Task | None:
         return await DatabaseModule.remove_entity(Task, task_id)
+
+    @staticmethod
+    async def update_task(payload: dict) -> Task | None:
+        task_id = payload.get("id")
+        task_new_data = {
+            "title": payload.get("title"),
+            "description": payload.get("description"),
+        }
+        return await DatabaseModule.put_entity(Task, task_new_data, task_id)

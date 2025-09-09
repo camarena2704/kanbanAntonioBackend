@@ -12,15 +12,6 @@ from app.services.board_service.board_service import BoardService
 router = APIRouter()
 
 
-@router.post("/", response_model=BoardOutputSchema)
-async def create_board(
-    payload: BoardCreateSchema,
-    token_decoder: AuthDataOutputSchema = Depends(decode_token),
-) -> BoardOutputSchema:
-    user_email = token_decoder.payload.get("email")
-    return await BoardService.create_board(payload, user_email)
-
-
 @router.get("/all-board-paginated/{workspace_id}", response_model=BoardPaginateSchema)
 async def get_all_board_paginated(
     workspace_id: int,
@@ -33,6 +24,15 @@ async def get_all_board_paginated(
     return await BoardService.get_all_board_paginate_by_workspace_id(
         user_email, workspace_id, is_favourite, page, limit
     )
+
+
+@router.post("/", response_model=BoardOutputSchema)
+async def create_board(
+    payload: BoardCreateSchema,
+    token_decoder: AuthDataOutputSchema = Depends(decode_token),
+) -> BoardOutputSchema:
+    user_email = token_decoder.payload.get("email")
+    return await BoardService.create_board(payload, user_email)
 
 
 @router.put("/update-favorite/{board_id}", response_model=BoardOutputSchema)
