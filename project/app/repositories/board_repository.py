@@ -21,11 +21,12 @@ class BoardRepository:
 
     @staticmethod
     async def get_all_board_filter_paginate_by_workspace_id(
-        filters: dict,
-        page: int,
-        limit: int,
-        query: Q = None,
-        order: str = "updated_at",
+            filters: dict,
+            page: int,
+            limit: int,
+            query: Q = None,
+            order: str = "updated_at",
+            exclude: dict = None,
     ) -> tuple[list[Board], int] | None:
         return await DatabaseModule.get_all_entity_filtered_paginated(
             Board,
@@ -34,6 +35,40 @@ class BoardRepository:
             page=page,
             limit=limit,
             order=order,
+            exclude=exclude,
+        )
+
+    @staticmethod
+    async def get_non_favorite_boards_paginated(
+            workspace_id: int,
+            user_id: int,
+            page: int,
+            limit: int,
+            order: str = "updated_at"
+    ) -> tuple[list[Board], int] | None:
+        """Get all boards in workspace that are NOT favorites for the specified user"""
+        # Get all boards in the workspace
+        all_boards_query = Board.filter(workspace_id=workspace_id)
+        
+        # Get favorite board IDs for this user in this workspace
+        favorite_board_ids = await Board.filter(
+            workspace_id=workspace_id,
+            users__id=user_id
+        ).values_list('id', flat=True)
+        
+        # Filter out favorites
+        if favorite_board_ids:
+            non_favorite_query = all_boards_query.exclude(id__in=favorite_board_ids)
+        else:
+            # If no favorites, all boards are non-favorites
+            non_favorite_query = all_boards_query
+            
+        if order:
+            non_favorite_query = non_favorite_query.order_by(order)
+            
+        return (
+            await non_favorite_query.offset(page * limit).limit(limit),
+            await non_favorite_query.count()
         )
 
     @staticmethod

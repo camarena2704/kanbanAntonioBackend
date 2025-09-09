@@ -19,5 +19,15 @@ class UserService:
         return UserOutputSchema(**response.__dict__)
 
     @staticmethod
-    async def get_user_by_email(email: str) -> User:
-        return await UserRepository.get_user_by_email(email)
+    async def get_user_by_email(email: str) -> UserOutputSchema:
+        response = await UserRepository.get_user_by_email(email)
+        if not response:
+            raise UserServiceException(UserServiceExceptionInfo.USER_NOT_FOUND)
+        return UserOutputSchema(**response.__dict__)
+
+    @staticmethod
+    async def get_user_by_email_model(email: str) -> User:
+        response = await UserRepository.get_user_by_email(email)
+        if not response:
+            raise UserServiceException(UserServiceExceptionInfo.USER_NOT_FOUND)
+        return response

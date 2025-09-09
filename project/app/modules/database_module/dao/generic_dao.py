@@ -61,20 +61,30 @@ class GenericDao:
 
     @classmethod
     async def get_all_entity_filtered_paginated(
-        cls,
-        model: Type[DatabaseModel],
-        page: int = 0,
-        limit: int = 25,
-        q: Q = None,
-        filters: dict = None,
-        order: str = None,
+            cls,
+            model: Type[DatabaseModel],
+            page: int = 0,
+            limit: int = 25,
+            q: Q = None,
+            filters: dict = None,
+            exclude: dict = None,
+            order: str = None,
     ) -> tuple[list[DatabaseModel], int]:
-        filters = filters if filters else {}
+        filters = filters or {}
+        exclude = exclude or {}
+
         data = model.filter(q, **filters) if q else model.filter(**filters)
+
+        if exclude:
+            data = data.exclude(**exclude)
+
         if order:
             data = data.order_by(order)
 
-        return await data.offset(page * limit).limit(limit), await data.all().count()
+        return (
+            await data.offset(page * limit).limit(limit),
+            await data.count()
+        )
 
     @classmethod
     async def put_entity(

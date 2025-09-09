@@ -1,3 +1,5 @@
+from app.modules.database_module.models.default import User
+from app.repositories.user_repository import UserRepository
 from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.workspace_schema import (
     WorkspaceCreateSchema,
@@ -16,10 +18,9 @@ from app.services.workspace_service.workspace_service_exception import (
 class WorkspaceService:
     @staticmethod
     async def create_workspace(
-        workspace: WorkspaceInputSchema, user_email
+            workspace: WorkspaceInputSchema, user_email
     ) -> WorkspaceOutputSchema:
-        user_model = await UserService.get_user_by_email(user_email)
-
+        user_model = await UserService.get_user_by_email_model(user_email)
         # Check user not contain workspace with equals name
         workspace_equals = await WorkspaceService.get_workspace_by_name(
             WorkspaceCreateSchema(name=workspace.name.strip(), owner_id=user_model.id)
@@ -48,7 +49,7 @@ class WorkspaceService:
 
     @staticmethod
     async def get_workspace_by_name(
-        workspace_filtered: WorkspaceCreateSchema,
+            workspace_filtered: WorkspaceCreateSchema,
     ) -> WorkspaceOutputSchema | None:
         return await WorkspaceRepository.get_workspace_by_name(
             workspace_filtered.model_dump()
@@ -56,7 +57,7 @@ class WorkspaceService:
 
     @staticmethod
     async def check_user_contain_workspace(
-        payload: WorkspaceFilterByUserInputSchema,
+            payload: WorkspaceFilterByUserInputSchema,
     ) -> bool:
         return (
             True
@@ -68,7 +69,7 @@ class WorkspaceService:
 
     @staticmethod
     async def get_all_workspaces(
-        user_email: str,
+            user_email: str,
     ) -> list[WorkspaceFilterByUserIdOutputSchema]:
         response = await WorkspaceRepository.get_all_workspace(user_email)
         if not response:
