@@ -31,4 +31,4 @@ class TaskFilterByTitleAndBoard(BaseSchema):
 
 class TaskUpdateOrderSchema(BaseSchema):
     id: int
-    new_order: int = Field(ge=0)
+    new_order: int = Field(gt=0)
