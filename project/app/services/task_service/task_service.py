@@ -15,6 +15,7 @@ from app.schemas.task_schema import (
     TaskUpdateSchema,
 )
 from app.services.column_service.column_service import ColumnService
+from app.services.permission_service.permission_service import PermissionService
 from app.services.task_service.task_service_exception import (
     TaskServiceException,
     TaskServiceExceptionInfo,
@@ -24,7 +25,10 @@ from app.utils.string_helper import StringHelper
 
 class TaskService:
     @staticmethod
-    async def create_task(task: TaskInputSchema) -> TaskOutputSchema:
+    async def create_task(task: TaskInputSchema, user_email: str) -> TaskOutputSchema:
+        # Validate user has permission to create tasks in this column
+        await PermissionService.validate_user_column_access(user_email, task.column_id)
+
         # get board_id from column
         column = await ColumnService.get_column_by_id(task.column_id)
         board_id = column.board_id
@@ -64,7 +68,12 @@ class TaskService:
         )
 
     @staticmethod
-    async def get_columns_with_tasks(board_id: int) -> list[ColumnWithTasksSchema]:
+    async def get_columns_with_tasks(
+        board_id: int, user_email: str
+    ) -> list[ColumnWithTasksSchema]:
+        # Validate user has access to this board
+        await PermissionService.validate_user_board_access(user_email, board_id)
+
         # get all columns for board
         columns = await ColumnRepository.get_all_column_by_board_id(board_id)
         if not columns:
@@ -98,7 +107,12 @@ class TaskService:
         return TaskOutputSchema(**response.__dict__)
 
     @staticmethod
-    async def move_task(update_task: TaskUpdateOrderSchema) -> TaskOutputSchema:
+    async def move_task(
+        update_task: TaskUpdateOrderSchema, user_email: str
+    ) -> TaskOutputSchema:
+        # Validate user has permission to modify this task
+        await PermissionService.validate_user_task_access(user_email, update_task.id)
+
         task = await TaskService.get_task_by_id(update_task.id)
         updated_task = await TaskRepository.update_order_task(
             {
@@ -114,7 +128,10 @@ class TaskService:
         return TaskOutputSchema(**updated_task.__dict__)
 
     @staticmethod
-    async def delete_task(task_id: int) -> TaskOutputSchema:
+    async def delete_task(task_id: int, user_email: str) -> TaskOutputSchema:
+        # Validate user has permission to delete this task
+        await PermissionService.validate_user_task_access(user_email, task_id)
+
         await TaskService.get_task_by_id(task_id)
         response = await TaskRepository.delete_task(task_id)
 
@@ -124,7 +141,12 @@ class TaskService:
         return TaskOutputSchema(**response.__dict__)
 
     @staticmethod
-    async def update_task(task_schema: TaskUpdateSchema) -> TaskOutputSchema:
+    async def update_task(
+        task_schema: TaskUpdateSchema, user_email: str
+    ) -> TaskOutputSchema:
+        # Validate user has permission to update this task
+        await PermissionService.validate_user_task_access(user_email, task_schema.id)
+
         task = await TaskService.get_task_by_id(task_schema.id)
 
         title = StringHelper.normalize_and_validate(task_schema.title)

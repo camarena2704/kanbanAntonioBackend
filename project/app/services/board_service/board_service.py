@@ -5,14 +5,18 @@ from app.schemas.board_schema import (
     BoardCreateSchema,
     BoardFavoriteSchema,
     BoardFilterByNameSchema,
+    BoardInvitationSchema,
+    BoardMemberOutputSchema,
     BoardOutputSchema,
     BoardPaginateSchema,
+    BoardRemoveMemberSchema,
 )
 from app.schemas.workspace_schema import WorkspaceFilterByUserInputSchema
 from app.services.board_service.board_service_exception import (
     BoardServiceException,
     BoardServiceExceptionInfo,
 )
+from app.services.permission_service.permission_service import PermissionService
 from app.services.user_service.user_service import UserService
 from app.services.workspace_service.workspace_service import WorkspaceService
 
@@ -45,16 +49,20 @@ class BoardService:
                 BoardServiceExceptionInfo.ERROR_EXISTING_BOARD_IN_WORKSPACE
             )
 
-        # Create the board
-        payload = BoardCreateSchema(
-            name=board.name.strip(),
-            workspace_id=board.workspace_id,
-        ).model_dump()
+        # Create the board with owner_id from authenticated user
+        payload = {
+            "name": board.name.strip(),
+            "workspace_id": board.workspace_id,
+            "owner_id": user.id,
+        }
         board_model = await BoardRepository.create_board(payload)
         if not board_model:
             raise BoardServiceException(BoardServiceExceptionInfo.ERROR_CREATING_BOARD)
 
         response = BoardOutputSchema(**board_model.__dict__)
+
+        # Auto-add creator as board member
+        await board_model.members.add(user)
 
         # Add to favorites if indicated using repository methods
         if board.is_favorite:
@@ -174,3 +182,120 @@ class BoardService:
         return await BoardRepository.is_favorite_board(
             favorite_schema.board_id, favorite_schema.user_id
         )
+
+    @staticmethod
+    async def invite_user_to_board(
+        invitation: BoardInvitationSchema, inviter_email: str
+    ) -> dict:
+        """Invite a user to a board (only board owner can do this)"""
+        # Validate inviter is board owner
+        await PermissionService.validate_board_ownership(
+            inviter_email, invitation.board_id
+        )
+
+        # Get the user being invited
+        try:
+            invited_user = await UserService.get_user_by_email_model(
+                invitation.invited_user_email
+            )
+        except Exception:
+            raise BoardServiceException(
+                BoardServiceExceptionInfo.ERROR_INVITED_USER_NOT_FOUND
+            )
+
+        # Get board
+        board = await BoardRepository.get_board_by_identifier(invitation.board_id)
+
+        # Check if user is already a member
+        is_already_member = await BoardRepository.is_board_member(
+            invitation.board_id, invited_user.id
+        )
+
+        if is_already_member:
+            raise BoardServiceException(
+                BoardServiceExceptionInfo.ERROR_USER_ALREADY_IN_BOARD
+            )
+
+        # Add user to board members
+        await board.members.add(invited_user)
+
+        return {
+            "message": f"User {invitation.invited_user_email} "
+            f"successfully added to board",
+            "board_id": invitation.board_id,
+            "user_email": invitation.invited_user_email,
+        }
+
+    @staticmethod
+    async def remove_user_from_board(
+        removal: BoardRemoveMemberSchema, remover_email: str
+    ) -> dict:
+        """Remove a user from a board (only board owner can do this)"""
+        # Validate remover is board owner
+        await PermissionService.validate_board_ownership(
+            remover_email, removal.board_id
+        )
+
+        # Get the user being removed
+        try:
+            user_to_remove = await UserService.get_user_by_email_model(
+                removal.user_email_to_remove
+            )
+        except Exception:
+            raise BoardServiceException(
+                BoardServiceExceptionInfo.ERROR_USER_TO_REMOVE_NOT_FOUND
+            )
+
+        # Get board
+        board = await BoardRepository.get_board_by_identifier(removal.board_id)
+
+        # Prevent removing the board owner
+        if board.owner_id == user_to_remove.id:
+            raise BoardServiceException(
+                BoardServiceExceptionInfo.ERROR_CANNOT_REMOVE_BOARD_OWNER
+            )
+
+        # Check if user is a member
+        is_member = await BoardRepository.is_board_member(
+            removal.board_id, user_to_remove.id
+        )
+
+        if not is_member:
+            raise BoardServiceException(
+                BoardServiceExceptionInfo.ERROR_USER_NOT_IN_BOARD
+            )
+
+        # Remove user from board
+        await board.members.remove(user_to_remove)
+
+        return {
+            "message": f"User {removal.user_email_to_remove} "
+            f"successfully removed from board",
+            "board_id": removal.board_id,
+            "user_email": removal.user_email_to_remove,
+        }
+
+    @staticmethod
+    async def get_board_members(
+        board_id: int, requester_email: str
+    ) -> list[BoardMemberOutputSchema]:
+        """Get all members of a board"""
+        # Validate requester has access to board
+        await PermissionService.validate_user_board_access(requester_email, board_id)
+
+        # Get board members
+        members = await BoardRepository.get_board_members(board_id)
+
+        # Get board owner info
+        board = await BoardRepository.get_board_by_identifier(board_id)
+
+        return [
+            BoardMemberOutputSchema(
+                id=member.id,
+                name=member.name,
+                surname=member.surname,
+                email=member.email,
+                is_owner=member.id == board.owner_id,
+            )
+            for member in members
+        ]

@@ -12,12 +12,18 @@ from app.services.column_service.column_service_exception import (
     ColumnServiceException,
     ColumnServiceExceptionInfo,
 )
+from app.services.permission_service.permission_service import PermissionService
 from app.utils.string_helper import StringHelper
 
 
 class ColumnService:
     @staticmethod
-    async def create_column(column: ColumnInputSchema) -> ColumnOutputSchema:
+    async def create_column(
+        column: ColumnInputSchema, user_email: str
+    ) -> ColumnOutputSchema:
+        # Validate user has permission to create columns in this board
+        await PermissionService.validate_user_board_access(user_email, column.board_id)
+
         # clean and validate the name
         clean_name = StringHelper.normalize_and_validate(column.name)
         if not clean_name:
@@ -88,7 +94,11 @@ class ColumnService:
     @staticmethod
     async def get_all_columns_by_board_id(
         board_id: int,
+        user_email: str,
     ) -> list[ColumnOutputSchema] | None:
+        # Validate user has access to this board
+        await PermissionService.validate_user_board_access(user_email, board_id)
+
         list_column = await ColumnRepository.get_all_column_by_board_id(board_id)
         columns_output_schema: list[ColumnOutputSchema] = [
             ColumnOutputSchema(**column.__dict__) for column in list_column
@@ -97,7 +107,14 @@ class ColumnService:
         return columns_output_schema if columns_output_schema else []
 
     @staticmethod
-    async def move_column(update_column: ColumnUpdateOrderSchema) -> ColumnOutputSchema:
+    async def move_column(
+        update_column: ColumnUpdateOrderSchema, user_email: str
+    ) -> ColumnOutputSchema:
+        # Validate user has permission to modify this column
+        await PermissionService.validate_user_column_access(
+            user_email, update_column.id
+        )
+
         column = await ColumnService.get_column_by_id(update_column.id)
         updated_column = await ColumnRepository.update_column_order(
             {
@@ -117,7 +134,13 @@ class ColumnService:
     @staticmethod
     async def update_column_name(
         column_schema: ColumnUpdateNameSchema,
+        user_email: str,
     ) -> ColumnOutputSchema:
+        # Validate user has permission to modify this column
+        await PermissionService.validate_user_column_access(
+            user_email, column_schema.id
+        )
+
         # clean and validate the name
         clean_name = StringHelper.normalize_and_validate(column_schema.new_name)
         if not clean_name:
@@ -152,7 +175,10 @@ class ColumnService:
         return ColumnOutputSchema(**response.__dict__)
 
     @staticmethod
-    async def delete_column(column_id: int) -> ColumnOutputSchema:
+    async def delete_column(column_id: int, user_email: str) -> ColumnOutputSchema:
+        # Validate user has permission to delete this column
+        await PermissionService.validate_user_column_access(user_email, column_id)
+
         column = await ColumnService.get_column_by_id(column_id)
 
         if not column:

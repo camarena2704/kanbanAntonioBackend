@@ -91,3 +91,16 @@ class BoardRepository:
     @staticmethod
     async def remove_user_from_favorites(board: Board, user: User) -> None:
         await board.users.remove(user)
+
+    @staticmethod
+    async def is_board_member(board_id: int, user_id: int) -> bool:
+        """Check if a user is a member of a board"""
+        return await Board.filter(id=board_id, members__id=user_id).exists()
+
+    @staticmethod
+    async def get_board_members(board_id: int) -> list:
+        """Get all members of a board"""
+        board = await Board.filter(id=board_id).prefetch_related("members").first()
+        if not board:
+            return []
+        return board.members

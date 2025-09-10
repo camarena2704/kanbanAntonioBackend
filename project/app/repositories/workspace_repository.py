@@ -26,3 +26,17 @@ class WorkspaceRepository:
         return await DatabaseModule.get_all_entity_filtered(
             Workspace, {"user__email": user_email}
         )
+
+    @staticmethod
+    async def get_workspace_by_id(workspace_id: int) -> Workspace | None:
+        return await DatabaseModule.get_entity(Workspace, workspace_id)
+
+    @staticmethod
+    async def get_workspace_members(workspace_id: int) -> list:
+        """Get all members of a workspace"""
+        workspace = (
+            await Workspace.filter(id=workspace_id).prefetch_related("user").first()
+        )
+        if not workspace:
+            return []
+        return workspace.user

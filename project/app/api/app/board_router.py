@@ -4,8 +4,11 @@ from app.core.security.decode_token import decode_token
 from app.schemas.auth_schema import AuthDataOutputSchema
 from app.schemas.board_schema import (
     BoardCreateSchema,
+    BoardInvitationSchema,
+    BoardMemberOutputSchema,
     BoardOutputSchema,
     BoardPaginateSchema,
+    BoardRemoveMemberSchema,
 )
 from app.services.board_service.board_service import BoardService
 
@@ -35,6 +38,15 @@ async def create_board(
     return await BoardService.create_board(payload, user_email)
 
 
+@router.post("/invite", response_model=dict)
+async def invite_user_to_board(
+    invitation: BoardInvitationSchema,
+    token: AuthDataOutputSchema = Depends(decode_token),
+) -> dict:
+    user_email = token.payload.get("email")
+    return await BoardService.invite_user_to_board(invitation, user_email)
+
+
 @router.put("/update-favorite/{board_id}", response_model=BoardOutputSchema)
 async def update_board_favourite(
     board_id: int, token: AuthDataOutputSchema = Depends(decode_token)
@@ -42,3 +54,21 @@ async def update_board_favourite(
     return await BoardService.update_favorite_board(
         board_id, token.payload.get("email")
     )
+
+
+@router.delete("/remove-member", response_model=dict)
+async def remove_user_from_board(
+    removal: BoardRemoveMemberSchema,
+    token: AuthDataOutputSchema = Depends(decode_token),
+) -> dict:
+    user_email = token.payload.get("email")
+    return await BoardService.remove_user_from_board(removal, user_email)
+
+
+@router.get("/{board_id}/members", response_model=list[BoardMemberOutputSchema])
+async def get_board_members(
+    board_id: int,
+    token: AuthDataOutputSchema = Depends(decode_token),
+) -> list[BoardMemberOutputSchema]:
+    user_email = token.payload.get("email")
+    return await BoardService.get_board_members(board_id, user_email)

@@ -25,3 +25,21 @@ class WorkspaceFilterByUserInputSchema(BaseSchema):
 
 class WorkspaceFilterByUserIdOutputSchema(WorkspaceInputSchema):
     id: int
+
+
+class WorkspaceInvitationSchema(BaseSchema):
+    workspace_id: int
+    invited_user_email: str
+
+
+class WorkspaceRemoveMemberSchema(BaseSchema):
+    workspace_id: int
+    user_email_to_remove: str
+
+
+class WorkspaceMemberOutputSchema(BaseSchema):
+    id: int
+    name: str
+    surname: str
+    email: str
+    is_owner: bool

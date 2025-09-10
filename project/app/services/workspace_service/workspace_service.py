@@ -4,8 +4,12 @@ from app.schemas.workspace_schema import (
     WorkspaceFilterByUserIdOutputSchema,
     WorkspaceFilterByUserInputSchema,
     WorkspaceInputSchema,
+    WorkspaceInvitationSchema,
+    WorkspaceMemberOutputSchema,
     WorkspaceOutputSchema,
+    WorkspaceRemoveMemberSchema,
 )
+from app.services.permission_service.permission_service import PermissionService
 from app.services.user_service.user_service import UserService
 from app.services.workspace_service.workspace_service_exception import (
     WorkspaceServiceException,
@@ -76,4 +80,131 @@ class WorkspaceService:
         return [
             WorkspaceFilterByUserIdOutputSchema(**workspace.__dict__)
             for workspace in response
+        ]
+
+    @staticmethod
+    async def invite_user_to_workspace(
+        invitation: WorkspaceInvitationSchema, inviter_email: str
+    ) -> dict:
+        """Invite a user to a workspace"""
+        # Validate inviter is workspace owner
+        await PermissionService.validate_workspace_ownership(
+            inviter_email, invitation.workspace_id
+        )
+
+        # Get the user being invited
+        try:
+            invited_user = await UserService.get_user_by_email_model(
+                invitation.invited_user_email
+            )
+        except Exception:
+            raise WorkspaceServiceException(
+                WorkspaceServiceExceptionInfo.ERROR_INVITED_USER_NOT_FOUND
+            )
+
+        # Check if user is already in the workspace
+        is_already_member = await WorkspaceRepository.check_user_contain_workspace(
+            {"workspace_id": invitation.workspace_id, "user_id": invited_user.id}
+        )
+
+        if is_already_member:
+            raise WorkspaceServiceException(
+                WorkspaceServiceExceptionInfo.ERROR_USER_ALREADY_IN_WORKSPACE
+            )
+
+        # Get workspace and add user
+        workspace = await WorkspaceRepository.get_workspace_by_id(
+            invitation.workspace_id
+        )
+        if not workspace:
+            raise WorkspaceServiceException(
+                WorkspaceServiceExceptionInfo.ERROR_WORKSPACE_NOT_FOUND
+            )
+
+        # Add user to workspace
+        await workspace.user.add(invited_user)
+
+        return {
+            "message": f"User {invitation.invited_user_email} "
+            f"successfully added to workspace",
+            "workspace_id": invitation.workspace_id,
+            "user_email": invitation.invited_user_email,
+        }
+
+    @staticmethod
+    async def remove_user_from_workspace(
+        removal: WorkspaceRemoveMemberSchema, remover_email: str
+    ) -> dict:
+        """Remove a user from a workspace"""
+        # Validate remover is workspace owner
+        await PermissionService.validate_workspace_ownership(
+            remover_email, removal.workspace_id
+        )
+
+        # Get the user being removed
+        try:
+            user_to_remove = await UserService.get_user_by_email_model(
+                removal.user_email_to_remove
+            )
+        except Exception:
+            raise WorkspaceServiceException(
+                WorkspaceServiceExceptionInfo.ERROR_USER_TO_REMOVE_NOT_FOUND
+            )
+
+        # Check if user is in the workspace
+        is_member = await WorkspaceRepository.check_user_contain_workspace(
+            {"workspace_id": removal.workspace_id, "user_id": user_to_remove.id}
+        )
+
+        if not is_member:
+            raise WorkspaceServiceException(
+                WorkspaceServiceExceptionInfo.ERROR_USER_NOT_IN_WORKSPACE
+            )
+
+        # Prevent removing the workspace owner
+        workspace = await WorkspaceRepository.get_workspace_by_id(removal.workspace_id)
+        if workspace.owner_id == user_to_remove.id:
+            raise WorkspaceServiceException(
+                WorkspaceServiceExceptionInfo.ERROR_CANNOT_REMOVE_WORKSPACE_OWNER
+            )
+
+        # Remove user from workspace
+        await workspace.user.remove(user_to_remove)
+
+        return {
+            "message": f"User {removal.user_email_to_remove} "
+            f"successfully removed from workspace",
+            "workspace_id": removal.workspace_id,
+            "user_email": removal.user_email_to_remove,
+        }
+
+    @staticmethod
+    async def get_workspace_members(
+        workspace_id: int, requester_email: str
+    ) -> list[WorkspaceMemberOutputSchema]:
+        """Get all members of a workspace"""
+        # Validate requester has access to workspace
+        await PermissionService.validate_user_workspace_access(
+            requester_email, workspace_id
+        )
+
+        # Get workspace members
+        members = await WorkspaceRepository.get_workspace_members(workspace_id)
+
+        # Get workspace owner info
+        workspace = await WorkspaceRepository.get_workspace_by_id(workspace_id)
+        if not workspace:
+            raise WorkspaceServiceException(
+                WorkspaceServiceExceptionInfo.ERROR_WORKSPACE_NOT_FOUND
+            )
+
+        return [
+            WorkspaceMemberOutputSchema(
+                id=member.id,
+                name=member.name,
+                surname=member.surname,
+                email=member.email,
+                is_owner=member.id == workspace.owner_id,
+            )
+            for member in members
         ]

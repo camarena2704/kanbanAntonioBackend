@@ -12,6 +12,7 @@ class BoardCreateSchema(BaseSchema):
 
 class BoardOutputSchema(BoardCreateSchema):
     id: int
+    owner_id: int
     created_at: datetime
     updated_at: datetime
 
@@ -29,3 +30,21 @@ class BoardPaginateSchema(BaseSchema):
 class BoardFavoriteSchema(BaseSchema):
     board_id: int
     user_id: int
+
+
+class BoardInvitationSchema(BaseSchema):
+    board_id: int
+    invited_user_email: str
+
+
+class BoardRemoveMemberSchema(BaseSchema):
+    board_id: int
+    user_email_to_remove: str
+
+
+class BoardMemberOutputSchema(BaseSchema):
+    id: int
+    name: str
+    surname: str
+    email: str
+    is_owner: bool
