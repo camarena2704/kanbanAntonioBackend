@@ -55,7 +55,7 @@ class TaskService:
 
     @staticmethod
     async def get_task_by_title_and_board_id(
-            task_filter: TaskFilterByTitleAndBoard,
+        task_filter: TaskFilterByTitleAndBoard,
     ) -> TaskOutputSchema | None:
         return await TaskRepository.get_task_by_title_and_board_id(
             TaskFilterByTitleAndBoard(
@@ -132,17 +132,20 @@ class TaskService:
             column = await ColumnService.get_column_by_id(task.column_id)
             board_id = column.board_id
             task_aux = await TaskService.get_task_by_title_and_board_id(
-                TaskFilterByTitleAndBoard(
-                    title=title,
-                    board_id=board_id
-                ))
+                TaskFilterByTitleAndBoard(title=title, board_id=board_id)
+            )
 
             if task_aux:
-                raise TaskServiceException(TaskServiceExceptionInfo.ERROR_EXISTING_TASK_IN_BOARD)
+                raise TaskServiceException(
+                    TaskServiceExceptionInfo.ERROR_EXISTING_TASK_IN_BOARD
+                )
         else:
             title = task.title
 
-        description = StringHelper.normalize_and_validate(task_schema.description) or task.description
+        description = (
+            StringHelper.normalize_and_validate(task_schema.description)
+            or task.description
+        )
 
         task_normalize_data = TaskUpdateSchema(
             id=task.id,

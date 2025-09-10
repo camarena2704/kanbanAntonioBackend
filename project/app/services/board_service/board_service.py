@@ -20,7 +20,7 @@ from app.services.workspace_service.workspace_service import WorkspaceService
 class BoardService:
     @staticmethod
     async def create_board(
-            board: BoardCreateSchema, user_email: str
+        board: BoardCreateSchema, user_email: str
     ) -> BoardOutputSchema:
         # Get user by email
         user = await UserService.get_user_by_email_model(user_email)
@@ -65,7 +65,7 @@ class BoardService:
 
     @staticmethod
     async def get_board_by_name_and_workspace_id(
-            board_filtered: BoardFilterByNameSchema,
+        board_filtered: BoardFilterByNameSchema,
     ) -> BoardOutputSchema | None:
         # Retrieve a board by name within a workspace
         board = await BoardRepository.get_board_by_name_and_workspace(
@@ -78,11 +78,11 @@ class BoardService:
 
     @staticmethod
     async def get_all_board_paginate_by_workspace_id(
-            user_email: str,
-            workspace_id: int,
-            is_favorite: bool,
-            page: int = 0,
-            limit: int = 25,
+        user_email: str,
+        workspace_id: int,
+        is_favorite: bool,
+        page: int = 0,
+        limit: int = 25,
     ) -> BoardPaginateSchema:
         # Get user by email
         user = await UserService.get_user_by_email_model(user_email)
@@ -100,19 +100,18 @@ class BoardService:
         if is_favorite:
             # Get boards that are favorites for this user
             query = Q(workspace_id=workspace_id) & Q(users__id=user.id)
-            response = await BoardRepository.get_all_board_filter_paginate_by_workspace_id(
-                {},
-                page,
-                limit,
-                query=query,
+            response = (
+                await BoardRepository.get_all_board_filter_paginate_by_workspace_id(
+                    {},
+                    page,
+                    limit,
+                    query=query,
+                )
             )
         else:
             # Get non-favorite boards using the specialized method
             response = await BoardRepository.get_non_favorite_boards_paginated(
-                workspace_id=workspace_id,
-                user_id=user.id,
-                page=page,
-                limit=limit
+                workspace_id=workspace_id, user_id=user.id, page=page, limit=limit
             )
 
         if not response:
@@ -134,7 +133,7 @@ class BoardService:
 
     @staticmethod
     async def update_favorite_board(
-            board_id: int, user_email: str
+        board_id: int, user_email: str
     ) -> BoardOutputSchema:
         # Get user by email
         user = await UserService.get_user_by_email_model(user_email)

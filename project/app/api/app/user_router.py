@@ -9,12 +9,14 @@ router = APIRouter()
 
 
 @router.get("/me", response_model=UserOutputSchema)
-async def get_profile(current_user: AuthDataOutputSchema = Depends(decode_token)) -> UserOutputSchema:
+async def get_profile(
+    current_user: AuthDataOutputSchema = Depends(decode_token),
+) -> UserOutputSchema:
     return await UserService.get_user_by_email(current_user.payload.get("email"))
 
 
 @router.post("/register", response_model=UserOutputSchema)
 async def register(
-        user: UserInputSchema, _: AuthDataOutputSchema = Depends(decode_token)
+    user: UserInputSchema, _: AuthDataOutputSchema = Depends(decode_token)
 ) -> UserOutputSchema:
     return await UserService.create_user(user)
