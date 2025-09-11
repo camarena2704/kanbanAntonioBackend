@@ -40,3 +40,7 @@ class WorkspaceRepository:
         if not workspace:
             return []
         return workspace.user
+
+    @staticmethod
+    async def delete_workspace(workspace_id: int) -> Workspace | None:
+        return await DatabaseModule.delete_entity(Workspace, {"id": workspace_id})

@@ -208,3 +208,30 @@ class WorkspaceService:
             )
             for member in members
         ]
+
+    @staticmethod
+    async def delete_workspace(
+        workspace_id: int, requester_email: str
+    ) -> WorkspaceOutputSchema:
+        """Delete a workspace (only workspace owner can do this)"""
+        # Validate requester is workspace owner
+        await PermissionService.validate_workspace_ownership(
+            requester_email, workspace_id
+        )
+
+        # Get workspace to return info before deletion
+        workspace = await WorkspaceRepository.get_workspace_by_id(workspace_id)
+        if not workspace:
+            raise WorkspaceServiceException(
+                WorkspaceServiceExceptionInfo.ERROR_WORKSPACE_NOT_FOUND
+            )
+
+        # Delete workspace (this will cascade delete all boards, columns, tasks)
+        deleted_workspace = await WorkspaceRepository.delete_workspace(workspace_id)
+
+        if not deleted_workspace:
+            raise WorkspaceServiceException(
+                WorkspaceServiceExceptionInfo.ERROR_DELETING_WORKSPACE
+            )
+
+        return WorkspaceOutputSchema(**deleted_workspace.__dict__)

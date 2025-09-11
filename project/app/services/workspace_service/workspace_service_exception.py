@@ -14,6 +14,7 @@ class WorkspaceServiceExceptionInfo(BaseExceptionInfo):
     ERROR_USER_TO_REMOVE_NOT_FOUND = (2006, "User to remove not found", 404)
     ERROR_USER_NOT_IN_WORKSPACE = (2007, "User is not a member of this workspace", 400)
     ERROR_CANNOT_REMOVE_WORKSPACE_OWNER = (2008, "Cannot remove workspace owner", 403)
+    ERROR_DELETING_WORKSPACE = (2009, "Error deleting workspace", 500)
 
 
 class WorkspaceServiceException(BaseException):
