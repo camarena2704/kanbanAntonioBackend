@@ -1,7 +1,7 @@
 from app.core.supabase.supabase_client import get_supabase_admin
 from app.repositories.auth_repository import AuthRepository
 from app.repositories.user_repository import UserRepository
-from app.schemas.user_schema import UserOutputSchema
+from app.schemas.user_schema import UserOutputSchema, UserUpdateSchema
 from app.services.user_service.user_service_exception import (
     UserServiceException,
     UserServiceExceptionInfo,
@@ -28,9 +28,9 @@ class UserService:
         return UserOutputSchema(**user.__dict__)
 
     @staticmethod
-    async def update_user(user_id: int, data: dict) -> UserOutputSchema:
+    async def update_user(user_id: int, data: UserUpdateSchema) -> UserOutputSchema:
         # Update user fields in the local database
-        user = await UserRepository.update_user(user_id, data)
+        user = await UserRepository.update_user(user_id, data.model_dump())
         if not user:
             raise UserServiceException(UserServiceExceptionInfo.USER_NOT_FOUND)
         # Return the updated user as a schema instance

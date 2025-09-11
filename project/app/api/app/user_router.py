@@ -2,14 +2,14 @@ from fastapi import APIRouter, Depends
 
 from app.core.security.decode_token import decode_token
 from app.schemas.auth_schema import AuthDataOutputSchema
-from app.schemas.user_schema import UserOutputSchema
+from app.schemas.user_schema import UserOutputSchema, UserUpdateSchema
 from app.services.user_service.user_service import UserService
 
 router = APIRouter()
 
 
 @router.get("/me", response_model=UserOutputSchema)
-async def get_profile(current_user: AuthDataOutputSchema = Depends(decode_token)):
+async def get_profile(current_user: AuthDataOutputSchema = Depends(decode_token)) -> UserOutputSchema:
     """
     Get the profile of the currently authenticated user.
     Retrieves the user data from the database using their email.
@@ -19,8 +19,8 @@ async def get_profile(current_user: AuthDataOutputSchema = Depends(decode_token)
 
 @router.put("/me", response_model=UserOutputSchema)
 async def update_profile(
-    data: dict, current_user: AuthDataOutputSchema = Depends(decode_token)
-):
+        data: UserUpdateSchema, current_user: AuthDataOutputSchema = Depends(decode_token)
+) -> UserOutputSchema:
     """
     Update the profile of the currently authenticated user.
     Accepts a dictionary with the fields to update and returns the updated user.
