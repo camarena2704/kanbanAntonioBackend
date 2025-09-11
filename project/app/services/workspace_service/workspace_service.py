@@ -85,7 +85,7 @@ class WorkspaceService:
     @staticmethod
     async def invite_user_to_workspace(
         invitation: WorkspaceInvitationSchema, inviter_email: str
-    ) -> dict:
+    ) -> WorkspaceInvitationSchema:
         """Invite a user to a workspace"""
         # Validate inviter is workspace owner
         await PermissionService.validate_workspace_ownership(
@@ -124,17 +124,12 @@ class WorkspaceService:
         # Add user to workspace
         await workspace.user.add(invited_user)
 
-        return {
-            "message": f"User {invitation.invited_user_email} "
-            f"successfully added to workspace",
-            "workspace_id": invitation.workspace_id,
-            "user_email": invitation.invited_user_email,
-        }
+        return invitation
 
     @staticmethod
     async def remove_user_from_workspace(
         removal: WorkspaceRemoveMemberSchema, remover_email: str
-    ) -> dict:
+    ) -> WorkspaceRemoveMemberSchema:
         """Remove a user from a workspace"""
         # Validate remover is workspace owner
         await PermissionService.validate_workspace_ownership(
@@ -171,12 +166,7 @@ class WorkspaceService:
         # Remove user from workspace
         await workspace.user.remove(user_to_remove)
 
-        return {
-            "message": f"User {removal.user_email_to_remove} "
-            f"successfully removed from workspace",
-            "workspace_id": removal.workspace_id,
-            "user_email": removal.user_email_to_remove,
-        }
+        return removal
 
     @staticmethod
     async def get_workspace_members(

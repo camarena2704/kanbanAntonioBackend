@@ -186,7 +186,7 @@ class BoardService:
     @staticmethod
     async def invite_user_to_board(
         invitation: BoardInvitationSchema, inviter_email: str
-    ) -> dict:
+    ) -> BoardInvitationSchema:
         """Invite a user to a board (only board owner can do this)"""
         # Validate inviter is board owner
         await PermissionService.validate_board_ownership(
@@ -219,17 +219,12 @@ class BoardService:
         # Add user to board members
         await board.members.add(invited_user)
 
-        return {
-            "message": f"User {invitation.invited_user_email} "
-            f"successfully added to board",
-            "board_id": invitation.board_id,
-            "user_email": invitation.invited_user_email,
-        }
+        return invitation
 
     @staticmethod
     async def remove_user_from_board(
         removal: BoardRemoveMemberSchema, remover_email: str
-    ) -> dict:
+    ) -> BoardRemoveMemberSchema:
         """Remove a user from a board (only board owner can do this)"""
         # Validate remover is board owner
         await PermissionService.validate_board_ownership(
@@ -268,12 +263,7 @@ class BoardService:
         # Remove user from board
         await board.members.remove(user_to_remove)
 
-        return {
-            "message": f"User {removal.user_email_to_remove} "
-            f"successfully removed from board",
-            "board_id": removal.board_id,
-            "user_email": removal.user_email_to_remove,
-        }
+        return removal
 
     @staticmethod
     async def get_board_members(

@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.get("/all-me", response_model=list[WorkspaceFilterByUserIdOutputSchema])
 async def get_all_workspaces_me(
-        token_decoder: AuthDataOutputSchema = Depends(decode_token),
+    token_decoder: AuthDataOutputSchema = Depends(decode_token),
 ):
     user_email = token_decoder.payload.get("email")
     return await WorkspaceService.get_all_workspaces(user_email)
@@ -25,8 +25,8 @@ async def get_all_workspaces_me(
 
 @router.get("/{workspace_id}/members", response_model=list[WorkspaceMemberOutputSchema])
 async def get_workspace_members(
-        workspace_id: int,
-        token_decoder: AuthDataOutputSchema = Depends(decode_token),
+    workspace_id: int,
+    token_decoder: AuthDataOutputSchema = Depends(decode_token),
 ) -> list[WorkspaceMemberOutputSchema]:
     user_email = token_decoder.payload.get("email")
     return await WorkspaceService.get_workspace_members(workspace_id, user_email)
@@ -34,32 +34,34 @@ async def get_workspace_members(
 
 @router.post("/", response_model=WorkspaceOutputSchema)
 async def create_workspace(
-        workspace_input: WorkspaceInputSchema,
-        token_decoder: AuthDataOutputSchema = Depends(decode_token),
+    workspace_input: WorkspaceInputSchema,
+    token_decoder: AuthDataOutputSchema = Depends(decode_token),
 ) -> WorkspaceOutputSchema:
     user_email = token_decoder.payload.get("email")
     return await WorkspaceService.create_workspace(workspace_input, user_email)
 
 
-@router.post("/invite", response_model=dict)
+@router.post("/invite", response_model=WorkspaceInvitationSchema)
 async def invite_user_to_workspace(
-        invitation: WorkspaceInvitationSchema,
-        token_decoder: AuthDataOutputSchema = Depends(decode_token),
-) -> dict:
+    invitation: WorkspaceInvitationSchema,
+    token_decoder: AuthDataOutputSchema = Depends(decode_token),
+) -> WorkspaceInvitationSchema:
     user_email = token_decoder.payload.get("email")
     return await WorkspaceService.invite_user_to_workspace(invitation, user_email)
 
 
-@router.delete("/remove-member", response_model=dict)
+@router.delete("/remove-member", response_model=WorkspaceRemoveMemberSchema)
 async def remove_user_from_workspace(
-        removal: WorkspaceRemoveMemberSchema,
-        token_decoder: AuthDataOutputSchema = Depends(decode_token),
-) -> dict:
+    removal: WorkspaceRemoveMemberSchema,
+    token_decoder: AuthDataOutputSchema = Depends(decode_token),
+) -> WorkspaceRemoveMemberSchema:
     user_email = token_decoder.payload.get("email")
     return await WorkspaceService.remove_user_from_workspace(removal, user_email)
 
 
 @router.delete("/remove-workspace/{workspace_id}", response_model=WorkspaceOutputSchema)
-async def remove_workspace(workspace_id: int, token_decoder: AuthDataOutputSchema = Depends(decode_token)):
+async def remove_workspace(
+    workspace_id: int, token_decoder: AuthDataOutputSchema = Depends(decode_token)
+):
     user_email = token_decoder.payload.get("email")
     return WorkspaceService.delete_workspace(workspace_id, user_email)

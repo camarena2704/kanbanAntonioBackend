@@ -29,6 +29,15 @@ async def get_all_board_paginated(
     )
 
 
+@router.get("/{board_id}/members", response_model=list[BoardMemberOutputSchema])
+async def get_board_members(
+    board_id: int,
+    token: AuthDataOutputSchema = Depends(decode_token),
+) -> list[BoardMemberOutputSchema]:
+    user_email = token.payload.get("email")
+    return await BoardService.get_board_members(board_id, user_email)
+
+
 @router.post("/", response_model=BoardOutputSchema)
 async def create_board(
     payload: BoardCreateSchema,
@@ -38,11 +47,11 @@ async def create_board(
     return await BoardService.create_board(payload, user_email)
 
 
-@router.post("/invite", response_model=dict)
+@router.post("/invite", response_model=BoardInvitationSchema)
 async def invite_user_to_board(
     invitation: BoardInvitationSchema,
     token: AuthDataOutputSchema = Depends(decode_token),
-) -> dict:
+) -> BoardInvitationSchema:
     user_email = token.payload.get("email")
     return await BoardService.invite_user_to_board(invitation, user_email)
 
@@ -56,19 +65,10 @@ async def update_board_favourite(
     )
 
 
-@router.delete("/remove-member", response_model=dict)
+@router.delete("/remove-member", response_model=BoardRemoveMemberSchema)
 async def remove_user_from_board(
     removal: BoardRemoveMemberSchema,
     token: AuthDataOutputSchema = Depends(decode_token),
-) -> dict:
+) -> BoardRemoveMemberSchema:
     user_email = token.payload.get("email")
     return await BoardService.remove_user_from_board(removal, user_email)
-
-
-@router.get("/{board_id}/members", response_model=list[BoardMemberOutputSchema])
-async def get_board_members(
-    board_id: int,
-    token: AuthDataOutputSchema = Depends(decode_token),
-) -> list[BoardMemberOutputSchema]:
-    user_email = token.payload.get("email")
-    return await BoardService.get_board_members(board_id, user_email)
