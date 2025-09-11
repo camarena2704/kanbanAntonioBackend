@@ -11,6 +11,7 @@ from app.schemas.auth_schema import (
     ResetPasswordSchema,
 )
 from app.services.auth_service.auth_service import AuthService
+from app.services.user_service.user_service import UserService
 
 router = APIRouter()
 
@@ -31,15 +32,17 @@ async def login(data: LoginSchema, request: Request):
 @router.post("/refresh", response_model=AuthResponseSchema)
 async def refresh(data: RefreshSchema, token_data=Depends(decode_token)):
     """Refresh access token using refresh token"""
-    user_id = token_data.payload.get("sub")
-    return await AuthService.refresh(data, user_id)
+    user_email = token_data.payload.get("email")
+    user = await UserService.get_user_by_email(user_email)
+    return await AuthService.refresh(data, user.id)
 
 
 @router.post("/logout")
 async def logout(data: LogoutSchema, token_data=Depends(decode_token)):
     """Logout and remove session"""
-    user_id = token_data.payload.get("sub")
-    return await AuthService.logout(data, user_id)
+    user_email = token_data.payload.get("email")
+    user = await UserService.get_user_by_email(user_email)
+    return await AuthService.logout(data, user.id)
 
 
 @router.post("/forgot-password")

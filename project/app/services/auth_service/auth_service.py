@@ -113,12 +113,14 @@ class AuthService:
         Refresh user access token using a valid refresh token.
         Updates the last_used_at timestamp in the local session.
         """
+        # Get session from DB
         session = await AuthRepository.get_session(user_id, data.refresh_token)
         if not session:
             raise AuthServiceException(
                 AuthServiceExceptionInfo.ERROR_REFRESH_TOKEN_INVALID
             )
 
+        # Ask Supabase to refresh the session
         supabase = await get_supabase()
         try:
             response = await supabase.auth.refresh_session(data.refresh_token)
@@ -131,14 +133,18 @@ class AuthService:
                 AuthServiceExceptionInfo.ERROR_REFRESH_TOKEN_INVALID
             ) from e
 
+        # Update last used timestamp in local DB
         session.last_used_at = utc_now()
         await session.save()
+
+        # Load user from session relationship
+        user = await session.user
 
         return AuthResponseSchema(
             access_token=response.session.access_token,
             refresh_token=response.session.refresh_token,
-            user_id=user_id,
-            email=session.user.email,
+            user_id=user.id,
+            email=user.email,
         )
 
     @staticmethod
