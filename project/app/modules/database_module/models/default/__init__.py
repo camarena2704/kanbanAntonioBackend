@@ -5,4 +5,5 @@ from .task import Task
 # models views
 from .task_by_board import TaskByBoard
 from .user import User
+from .user_session import UserSession
 from .workspace import Workspace

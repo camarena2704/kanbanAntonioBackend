@@ -9,6 +9,7 @@ from starlette.responses import JSONResponse
 from tortoise import Tortoise
 
 from app.api.app import (
+    auth_router,
     board_router,
     column_router,
     task_router,
@@ -77,6 +78,7 @@ def create_app() -> FastAPI:
     # Routes
     api_version_router = APIRouter()
 
+    api_version_router.include_router(auth_router, prefix="/auth", tags=["Auth"])
     api_version_router.include_router(user_router, prefix="/users", tags=["User"])
     api_version_router.include_router(
         workspace_router, prefix="/workspaces", tags=["Workspace"]

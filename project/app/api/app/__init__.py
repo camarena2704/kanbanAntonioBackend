@@ -1,3 +1,4 @@
+from .auth_router import router as auth_router
 from .board_router import router as board_router
 from .column_router import router as column_router
 from .task_router import router as task_router
