@@ -9,12 +9,12 @@ from app.modules.database_module.models.database_model import DatabaseModel
 class OrderHelper:
     @staticmethod
     async def reorder_entity(
-        model: Type[DatabaseModel],
-        entity_id: int,
-        parent_field: str,
-        parent_id: int,
-        old_order: int,
-        new_order: int,
+            model: Type[DatabaseModel],
+            entity_id: int,
+            parent_field: str,
+            parent_id: int,
+            old_order: int,
+            new_order: int,
     ) -> DatabaseModel | None:
         filters = {parent_field: parent_id}
 
@@ -32,4 +32,4 @@ class OrderHelper:
                 order__lte=new_order,
             ).update(order=F("order") - 1)
 
-        return await DatabaseModule.put_entity(model, {"order": new_order}, entity_id)
+        return await DatabaseModule.put_entity(model, {"order": new_order, parent_field: parent_id}, entity_id)

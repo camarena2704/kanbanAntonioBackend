@@ -1,4 +1,4 @@
-from collections import defaultdict
+from black.trans import defaultdict
 
 from app.repositories.column_repository import ColumnRepository
 from app.repositories.task_repository import TaskRepository
@@ -113,13 +113,16 @@ class TaskService:
         # Validate user has permission to modify this task
         await PermissionService.validate_user_task_access(user_email, update_task.id)
 
+        # Validate exist column with id
+        await ColumnService.get_column_by_id(update_task.column_id)
+
         task = await TaskService.get_task_by_id(update_task.id)
         updated_task = await TaskRepository.update_order_task(
             {
                 "order": task.order,
                 "task_id": task.id,
                 "new_order": update_task.new_order,
-                "column_id": task.column_id,
+                "column_id": update_task.column_id,
             }
         )
         if not updated_task:

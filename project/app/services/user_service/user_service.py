@@ -1,4 +1,5 @@
 from app.core.supabase.supabase_client import get_supabase_admin
+from app.modules.database_module.models.default import User
 from app.repositories.auth_repository import AuthRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.user_schema import UserOutputSchema, UserUpdateSchema
@@ -17,7 +18,14 @@ class UserService:
             raise UserServiceException(UserServiceExceptionInfo.USER_NOT_FOUND)
         # Return user data as a schema instance
         return UserOutputSchema(**user.__dict__)
-
+    @staticmethod
+    async def get_user_by_email_model(email: str) -> User:
+        # Fetch user by email from the local database
+        user = await UserRepository.get_user_by_email(email)
+        if not user:
+            raise UserServiceException(UserServiceExceptionInfo.USER_NOT_FOUND)
+        # Return user data as a schema instance
+        return user
     @staticmethod
     async def get_user_by_id(user_id: int) -> UserOutputSchema:
         # Fetch user by ID from the local database

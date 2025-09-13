@@ -43,4 +43,4 @@ class WorkspaceRepository:
 
     @staticmethod
     async def delete_workspace(workspace_id: int) -> Workspace | None:
-        return await DatabaseModule.delete_entity(Workspace, {"id": workspace_id})
+        return await DatabaseModule.remove_entity(Workspace, workspace_id)
